@@ -1,0 +1,135 @@
+//// -- Enums from PostgreSQL Dump
+
+Enum enum_chatbot_interactions_ai_response_mode {
+  text
+  speech_input
+  speech_output
+}
+
+Enum enum_chatbot_interactions_student_message_type {
+  text
+  speech_input
+  speech_output
+}
+
+Enum enum_courses_status {
+  published
+  draft
+  archived
+}
+
+Enum enum_courses_subject {
+  Matematika
+  IPA
+  IPS
+}
+
+Enum enum_student_sub_course_progress_status {
+  not_started
+  in_progress
+  completed
+}
+
+Enum enum_sub_courses_content_type {
+  video
+  quiz
+  pdf_material
+}
+
+Enum enum_users_role {
+  student
+  teacher
+}
+
+//// -- Tables from PostgreSQL Dump
+
+Table users {
+  id_user uuid [pk, not null] // Asumsi default: `uuid_generate_v4()` seperti DBML sebelumnya
+  nama_lengkap varchar(255) [not null]
+  email varchar(255) [unique, not null]
+  role enum_users_role [default: 'student']
+  kelas int
+  nama_sekolah varchar(255)
+  password_hash varchar(255)
+  foto_profil_url varchar(255)
+  status varchar(50) [default: 'active']
+  google_id varchar(255)
+  last_login timestamptz
+  created_at timestamptz [not null] // Asumsi default: `CURRENT_TIMESTAMP`
+  updated_at timestamptz [not null] // Seharusnya updated_at juga punya mekanisme update otomatis
+}
+
+Table courses {
+  id int [pk, increment, not null]
+  title varchar(255) [not null]
+  subject enum_courses_subject [not null]
+  kelas int [not null]
+  teacher_id uuid [ref: > users.id_user, not null]
+  course_code varchar(20) [unique, not null]
+  status enum_courses_status [default: 'draft']
+  cover_image_url varchar(255)
+  start_date timestamptz
+  end_date timestamptz
+  published_at timestamptz
+  created_at timestamptz [not null] // Asumsi default: `CURRENT_TIMESTAMP`
+  updated_at timestamptz [not null]
+}
+
+Table sub_courses {
+  id int [pk, increment, not null]
+  course_id int [ref: > courses.id, not null]
+  title varchar(255) [not null]
+  summary text
+  content_type enum_sub_courses_content_type [not null]
+  content_url varchar(255) [not null]
+  order_in_course int [not null]
+  created_at timestamptz [not null] // Asumsi default: `CURRENT_TIMESTAMP`
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (course_id, order_in_course) [unique, name: 'uq_sub_courses_course_order']
+  }
+}
+
+Table student_enrollments {
+  student_id uuid [ref: > users.id_user, not null]
+  course_id int [ref: > courses.id, not null]
+  enrollment_date timestamptz // Asumsi default: `CURRENT_TIMESTAMP`
+
+  Indexes {
+    (student_id, course_id) [pk]
+  }
+}
+
+Table student_sub_course_progress {
+  id int [pk, increment, not null]
+  enrollment_student_id uuid [not null]
+  enrollment_course_id int [not null]
+  sub_course_id int [ref: > sub_courses.id, not null]
+  status enum_student_sub_course_progress_status [default: 'not_started']
+  score int
+  started_at timestamptz
+  completed_at timestamptz
+  last_accessed_at timestamptz
+
+  Indexes {
+    (enrollment_student_id, enrollment_course_id, sub_course_id) [unique, name: 'uq_student_subcourse_progress']
+  }
+  // Catatan: Tidak ada Foreign Key ke student_enrollments di SQL dump yang diberikan.
+  // Jika ada, akan ditambahkan sebagai Ref eksplisit.
+}
+
+Table chatbot_interactions {
+  id int [pk, increment, not null]
+  student_id uuid [ref: > users.id_user, not null]
+  sub_course_id int [ref: > sub_courses.id, not null]
+  student_message_text text [not null]
+  student_message_type enum_chatbot_interactions_student_message_type [default: 'text']
+  ai_response_text text [not null]
+  ai_response_mode enum_chatbot_interactions_ai_response_mode [default: 'text']
+  interaction_timestamp timestamptz // Asumsi default: `CURRENT_TIMESTAMP`
+}
+
+// Catatan: Tabel student_engagement, sub_course_comments, teacher_feedback, dan system_logs
+// ada di DBML Anda sebelumnya tetapi tidak ada dalam SQL dump yang diberikan,
+// jadi tidak disertakan dalam konversi ini.
