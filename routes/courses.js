@@ -46,6 +46,78 @@ router.post('/', authenticate, teacherOnly, validateRequest(schemas.createCourse
   }
 });
 
+// Get teacher's own courses
+router.get('/my-courses', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, subject, kelas, status } = req.query;
+    const offset = (page - 1) * limit;
+
+    const whereClause = {
+      teacher_id: req.user.id_user
+    };
+    
+    if (subject) whereClause.subject = subject;
+    if (kelas) whereClause.kelas = kelas;
+    if (status) whereClause.status = status;
+
+    const { count, rows: courses } = await Course.findAndCountAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: 'teacher',
+          attributes: ['id_user', 'nama_lengkap']
+        },
+        {
+          model: SubCourse,
+          as: 'subCourses',
+          attributes: ['id', 'title', 'content_type', 'order_in_course']
+        },
+        {
+          model: StudentEnrollment,
+          as: 'enrollments',
+          include: [
+            {
+              model: User,
+              as: 'student',
+              attributes: ['id_user', 'nama_lengkap']
+            }
+          ]
+        }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['created_at', 'DESC']]
+    });
+
+    // Calculate statistics for each course
+    const coursesWithStats = courses.map(course => {
+      const enrollmentCount = course.enrollments ? course.enrollments.length : 0;
+      const subCourseCount = course.subCourses ? course.subCourses.length : 0;
+      
+      return {
+        ...course.toJSON(),
+        stats: {
+          totalStudents: enrollmentCount,
+          totalSubCourses: subCourseCount
+        }
+      };
+    });
+
+    res.json({
+      courses: coursesWithStats,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get all courses
 router.get('/', authenticate, async (req, res, next) => {
   try {

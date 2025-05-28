@@ -388,8 +388,7 @@
               "path": ["courses", "{{course_id}}", "publish"]
             }
           }
-        },
-        {
+        },        {
           "name": "Join Course",
           "request": {
             "method": "POST",
@@ -408,6 +407,19 @@
               "host": ["{{baseUrl}}"],
               "path": ["courses", "join"]
             }
+          }
+        },
+        {
+          "name": "Get My Courses (Teacher)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/my-courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "my-courses"]
+            },
+            "description": "Get all courses that the authenticated teacher owns/teaches"
           }
         }
       ]
