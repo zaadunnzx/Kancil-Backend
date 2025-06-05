@@ -22,9 +22,8 @@ const SubCourse = sequelize.define('SubCourse', {
   summary: {
     type: DataTypes.TEXT,
     allowNull: true
-  },
-  content_type: {
-    type: DataTypes.ENUM('video', 'quiz', 'pdf_material'),
+  },  content_type: {
+    type: DataTypes.ENUM('video', 'quiz', 'pdf_material', 'text', 'audio', 'image', 'pdf'),
     allowNull: false
   },
   content_url: {

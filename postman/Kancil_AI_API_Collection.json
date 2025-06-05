@@ -587,6 +587,194 @@
               "host": ["{{baseUrl}}"],
               "path": ["chat", "history", "{{subcourse_id}}"]
             }
+          }        }
+      ]
+    },
+    {
+      "name": "Comments & Reactions",
+      "item": [
+        {
+          "name": "Get Comments for SubCourse",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/subcourse/{{subcourse_id}}?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "subcourse", "{{subcourse_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a great lesson! Very helpful explanation.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "subcourse", "{{subcourse_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated comment: This lesson is excellent!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Reactions for SubCourse",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reactions", "subcourse", "{{subcourse_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Add/Update Reaction - Like",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reaction_type\": \"like\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reactions", "subcourse", "{{subcourse_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Add/Update Reaction - Unlike",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reaction_type\": \"unlike\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reactions", "subcourse", "{{subcourse_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Add/Update Reaction - Sad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reaction_type\": \"sad\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reactions", "subcourse", "{{subcourse_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Add/Update Reaction - flat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reaction_type\": \"flat\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reactions", "subcourse", "{{subcourse_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Remove Reaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reactions", "subcourse", "{{subcourse_id}}"]
+            }
           }
         }
       ]
@@ -762,8 +950,7 @@
               "path": ["users", "profile"]
             }
           }
-        },
-        {
+        },        {
           "name": "Change Password",
           "request": {
             "method": "PUT",
@@ -781,6 +968,39 @@
               "raw": "{{baseUrl}}/users/change-password",
               "host": ["{{baseUrl}}"],
               "path": ["users", "change-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "student",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        }
             }
           }
         },

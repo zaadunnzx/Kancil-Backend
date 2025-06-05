@@ -115,4 +115,47 @@ router.post('/profile-picture', authenticate, upload.single('profilePicture'), a
   }
 });
 
+// Upload profile photo (alternative endpoint)
+router.post('/profile-photo', authenticate, upload.single('foto_profil'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No profile photo uploaded' });
+    }
+
+    // Check if it's an image
+    if (!req.file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ error: 'Only image files are allowed for profile photos' });
+    }
+
+    // Generate photo URL
+    const foto_profil_url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    
+    // Update user profile photo URL in database
+    const { User } = require('../models');
+    const user = await User.findByPk(req.user.id_user);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await user.update({
+      foto_profil_url: foto_profil_url,
+      updated_at: new Date()
+    });
+
+    res.json({
+      message: 'Profile photo uploaded successfully',
+      foto_profil_url: foto_profil_url,
+      user: {
+        id: user.id_user,
+        nama_lengkap: user.nama_lengkap,
+        email: user.email,
+        role: user.role,
+        foto_profil_url: foto_profil_url
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

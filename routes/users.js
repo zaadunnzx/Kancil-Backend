@@ -80,4 +80,62 @@ router.put('/profile', authenticate, async (req, res, next) => {
   }
 });
 
+// Change password
+router.put('/change-password', authenticate, async (req, res, next) => {
+  try {
+    const { old_password, new_password } = req.body;
+    
+    // Validate input
+    if (!old_password || !new_password) {
+      return res.status(400).json({ 
+        error: 'Both old_password and new_password are required' 
+      });
+    }
+
+    // Validate new password length
+    if (new_password.length < 6) {
+      return res.status(400).json({ 
+        error: 'New password must be at least 6 characters long' 
+      });
+    }
+
+    // Get user with password hash
+    const bcrypt = require('bcryptjs');
+    const user = await User.findByPk(req.user.id_user);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify old password
+    const isOldPasswordValid = await bcrypt.compare(old_password, user.password_hash);
+    if (!isOldPasswordValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Check if new password is different from old password
+    const isSamePassword = await bcrypt.compare(new_password, user.password_hash);
+    if (isSamePassword) {
+      return res.status(400).json({ 
+        error: 'New password must be different from current password' 
+      });
+    }
+
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(new_password, 12);
+
+    // Update password
+    await user.update({
+      password_hash: newPasswordHash,
+      updated_at: new Date()
+    });
+
+    res.json({ 
+      message: 'Password changed successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

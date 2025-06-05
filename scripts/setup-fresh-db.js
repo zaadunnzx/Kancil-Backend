@@ -15,7 +15,7 @@ const setupFreshDatabase = async () => {
       database: 'postgres' // Connect to default postgres database
     });
 
-    const dbName = process.env.DB_NAME || 'kancil_ai_db';
+    const dbName = process.env.DB_NAME || 'kancil';
 
     console.log('🔍 Checking if database exists...');
     

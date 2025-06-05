@@ -5,7 +5,7 @@
 -- Dumped from database version 17.4
 -- Dumped by pg_dump version 17.4
 
--- Started on 2025-05-28 12:37:19
+-- Started on 2025-05-28 11:15:26
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -654,7 +654,6 @@ COPY public."SequelizeMeta" (name) FROM stdin;
 
 COPY public.chatbot_interactions (id, student_id, sub_course_id, student_message_text, student_message_type, ai_response_text, ai_response_mode, interaction_timestamp) FROM stdin;
 1	bf4c6d51-15cb-4c45-b526-8b36cfbe94de	6	Bagaimana cara menghitung 2 + 3?	text	Halo! Saya Pak Dino, asisten belajar Kancil AI. \n\nTentang "Bagaimana cara menghitung 2 + 3?":\n\nIni adalah jawaban simulasi dari AI. Dalam implementasi yang sesungguhnya, ini akan terhubung dengan layanan AI seperti:\n- Google Gemini API\n- OpenAI GPT API\n- Atau model AI custom\n\nSaya akan membantu kamu memahami materi "Updated SubCourse Title" dengan lebih baik!\n\nAda yang ingin kamu tanyakan lebih lanjut?	text	2025-05-26 22:19:44.424+07
-2	bf4c6d51-15cb-4c45-b526-8b36cfbe94de	3	Bagaimana cara menghitung 2 + 3?	text	Halo! Saya Pak Dino, asisten belajar Kancil AI. \n\nTentang "Bagaimana cara menghitung 2 + 3?":\n\nIni adalah jawaban simulasi dari AI. Dalam implementasi yang sesungguhnya, ini akan terhubung dengan layanan AI seperti:\n- Google Gemini API\n- OpenAI GPT API\n- Atau model AI custom\n\nSaya akan membantu kamu memahami materi "Kuis Angka" dengan lebih baik!\n\nAda yang ingin kamu tanyakan lebih lanjut?	text	2025-05-28 11:48:08.498+07
 \.
 
 
@@ -678,9 +677,9 @@ COPY public.courses (id, title, subject, kelas, teacher_id, course_code, status,
 1	Matematika Kelas 1 - Bilangan	Matematika	1	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	MATH01	published	\N	\N	\N	2025-05-26 15:21:24.015+07	2025-05-26 15:21:24.019+07	2025-05-26 15:21:24.019+07	\N
 2	IPA Kelas 2 - Hewan dan Tumbuhan	IPA	2	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	IPA01	published	\N	\N	\N	2025-05-26 15:21:24.024+07	2025-05-26 15:21:24.026+07	2025-05-26 15:21:24.026+07	\N
 3	Updated Course Title	Matematika	5	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	RTD5WU	draft	\N	2024-02-01 07:00:00+07	2024-06-15 07:00:00+07	\N	2025-05-26 17:33:20.85+07	2025-05-26 17:33:45.853+07	\N
+4	Updated Course Title	Matematika	5	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	56RFW9	published	\N	2024-02-01 07:00:00+07	2024-06-15 07:00:00+07	2025-05-26 21:09:04.347+07	2025-05-26 21:08:21.306+07	2025-05-26 21:09:04.348+07	\N
 5	IPS Kelas 3 - Lingkungan Sekitar	IPS	3	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	IPS01	published	\N	\N	\N	2025-05-26 21:30:00+07	2025-05-26 21:30:00+07	2025-05-26 21:30:00+07	\N
 6	Bahasa Indonesia Kelas 1 - Membaca Puisi	IPA	1	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	BIN01	draft	\N	\N	\N	\N	2025-05-26 21:31:00+07	2025-05-26 21:31:00+07	\N
-4	Updated Course Title	Matematika	5	d1a56ca1-7a12-4da6-8bde-69657e5f19e7	56RFW9	published	\N	2024-02-01 07:00:00+07	2024-06-15 07:00:00+07	2025-05-28 11:41:39.638+07	2025-05-26 21:08:21.306+07	2025-05-28 11:41:39.665279+07	\N
 \.
 
 
@@ -718,7 +717,6 @@ bf4c6d51-15cb-4c45-b526-8b36cfbe94de	2	2025-05-28 05:33:14.119+07
 COPY public.student_sub_course_progress (id, enrollment_student_id, enrollment_course_id, sub_course_id, status, score, started_at, completed_at, last_accessed_at) FROM stdin;
 1	bf4c6d51-15cb-4c45-b526-8b36cfbe94de	4	6	completed	85	\N	\N	2025-05-26 22:18:02.093+07
 2	bf4c6d51-15cb-4c45-b526-8b36cfbe94de	2	4	completed	8	\N	\N	2025-05-28 05:33:24.25+07
-6	bf4c6d51-15cb-4c45-b526-8b36cfbe94de	1	3	completed	8	\N	\N	2025-05-28 11:47:57.253+07
 \.
 
 
@@ -748,7 +746,6 @@ COPY public.users (id_user, nama_lengkap, email, role, kelas, nama_sekolah, pass
 ed05e596-06b4-4e38-b62e-3a71751b0730	Siswa 2	student2@kancil.com	student	3	SD Kancil	$2b$12$1ng.AogTMbo1Q2fK7BBoQuLJNHR.gt/T3CXQ1voxiEZui5pgFqLa.	\N	active	\N	\N	2025-05-26 15:21:24.007+07	2025-05-26 15:21:24.007+07
 b9614803-2421-42df-a02f-3d353abc14ce	Siswa 3	student3@kancil.com	student	1	SD Kancil	$2b$12$1ng.AogTMbo1Q2fK7BBoQuLJNHR.gt/T3CXQ1voxiEZui5pgFqLa.	\N	active	\N	\N	2025-05-26 15:21:24.012+07	2025-05-26 15:21:24.012+07
 90b510c3-c207-459c-a5c8-6cf5079a7c9f	Test Teacher	testteacher1@example.com	teacher	\N	SD Test	$2b$12$vedMHNXFyyJ8apwN3eKSluDsJWd9PvvYQlSIGUUTYZOOPork6T8Bu	\N	active	\N	2025-05-26 20:55:58.942+07	2025-05-26 20:55:58.915+07	2025-05-26 20:55:58.943+07
-d1a56ca1-7a12-4da6-8bde-69657e5f19e7	Updated Name	teacher@kancil.com	teacher	\N	Updated School	$2b$12$fRQyTwaI2d7IZrNB4OWVz.hYJQoqQTd2Z2sJbWnmeOkhTiKGrTUdm	\N	active	\N	2025-05-28 12:12:59.797+07	2025-05-26 15:21:23.506+07	2025-05-28 12:12:59.798428+07
 b6d3fd3a-f353-4876-b971-faa8d4932d42	Test Student	teststudent@example.com	student	5	SD Test	$2b$12$9x9NlUWgxSnirbAEdbrc4.bFnUsHAh74WLsP9imS1NsdNViXsGDDu	\N	active	\N	2025-05-26 17:30:44.526+07	2025-05-26 17:30:44.514+07	2025-05-26 17:30:44.526+07
 6e746464-7299-411b-a54f-ea95b045bba1	Test Teacher	testteacher@example.com	teacher	\N	SD Test	$2b$12$Rl9vOEpBVYwfPzE2dgPQ5.OwjHTdteFHHaZvIhXjWDQb4/SENZf76	\N	active	\N	2025-05-26 17:30:52.779+07	2025-05-26 17:30:52.771+07	2025-05-26 17:30:52.779+07
 e82a58c0-2cf3-48cf-953a-a20f4c2a4ef2	Zadun Nafiq	zadunnafiq@gmail.com	student	\N	\N	\N	https://lh3.googleusercontent.com/a/ACg8ocJ4QI-4nPH_cEovCKqLJc6TsBWsg6nOs_456LiiP34lh9lzZKE=s96-c	active	109627917884520957228	2025-05-26 17:46:17.239+07	2025-05-26 17:46:17.229+07	2025-05-26 17:46:17.239+07
@@ -757,7 +754,8 @@ c359216f-13f8-45c0-967f-c0bca0ba3427	Test Student	teststudent4@example.com	stude
 6b7c07ed-887c-4f7e-8137-4d9a0eda8ab5	Test Student	teststudent1@example.com	student	5	SD Test	$2b$12$fQUgzW1vaS3penLlMtQQoOgszVcjAS.5NLRpgAIVyLOC6Wya0eo9a	\N	active	\N	2025-05-26 20:33:36.13+07	2025-05-26 20:33:36.111+07	2025-05-26 20:33:36.13+07
 355c588b-2bfc-4bca-bfd4-3d248965ed0d	Test Student	teststudent2@example.com	student	5	SD Test	$2b$12$u7phDg2kWAqYtLoZ4xLBweLcJnr9AiXlB22Qjy.yjTEViwO3mQdKG	\N	active	\N	2025-05-26 22:52:13.17+07	2025-05-26 22:52:13.116+07	2025-05-26 22:52:13.171+07
 2cbb524e-670d-4bfa-9ee1-030850ba52f3	Test Student	teststudent3@example.com	student	5	SD Test School	$2b$12$7kdTIAspVi/TI5KrEpn8Z.PEf1I4ds7fEV3yptIsHceJrOhHNjf7O	http://localhost:5001/uploads/profiles/profile-1748275892952-403172116.png	active	\N	2025-05-26 23:11:33.791+07	2025-05-26 23:11:33.761+07	2025-05-26 23:11:33.791+07
-bf4c6d51-15cb-4c45-b526-8b36cfbe94de	Updated Name	student1@kancil.com	student	3	Updated School	$2b$12$1ng.AogTMbo1Q2fK7BBoQuLJNHR.gt/T3CXQ1voxiEZui5pgFqLa.	\N	active	\N	2025-05-28 12:12:39.216+07	2025-05-26 15:21:24+07	2025-05-28 12:12:39.223212+07
+d1a56ca1-7a12-4da6-8bde-69657e5f19e7	Updated Name	teacher@kancil.com	teacher	\N	Updated School	$2b$12$fRQyTwaI2d7IZrNB4OWVz.hYJQoqQTd2Z2sJbWnmeOkhTiKGrTUdm	\N	active	\N	2025-05-28 11:11:43.446+07	2025-05-26 15:21:23.506+07	2025-05-28 11:11:43.447168+07
+bf4c6d51-15cb-4c45-b526-8b36cfbe94de	Updated Name	student1@kancil.com	student	3	Updated School	$2b$12$1ng.AogTMbo1Q2fK7BBoQuLJNHR.gt/T3CXQ1voxiEZui5pgFqLa.	\N	active	\N	2025-05-28 11:11:51.941+07	2025-05-26 15:21:24+07	2025-05-28 11:11:51.942418+07
 \.
 
 
@@ -767,7 +765,7 @@ bf4c6d51-15cb-4c45-b526-8b36cfbe94de	Updated Name	student1@kancil.com	student	3	
 -- Name: chatbot_interactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.chatbot_interactions_id_seq', 2, true);
+SELECT pg_catalog.setval('public.chatbot_interactions_id_seq', 1, true);
 
 
 --
@@ -803,7 +801,7 @@ SELECT pg_catalog.setval('public.reactions_id_seq', 1, false);
 -- Name: student_sub_course_progress_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.student_sub_course_progress_id_seq', 6, true);
+SELECT pg_catalog.setval('public.student_sub_course_progress_id_seq', 2, true);
 
 
 --
@@ -812,7 +810,7 @@ SELECT pg_catalog.setval('public.student_sub_course_progress_id_seq', 6, true);
 -- Name: sub_courses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.sub_courses_id_seq', 7, true);
+SELECT pg_catalog.setval('public.sub_courses_id_seq', 6, true);
 
 
 --
@@ -1175,7 +1173,7 @@ ALTER TABLE ONLY public.sub_courses
     ADD CONSTRAINT sub_courses_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2025-05-28 12:37:19
+-- Completed on 2025-05-28 11:15:27
 
 --
 -- PostgreSQL database dump complete

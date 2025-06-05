@@ -1,5 +1,5 @@
 const express = require('express');
-const { SubCourse, Course, User, StudentSubCourseProgress, StudentEnrollment } = require('../models');
+const { SubCourse, Course, User, StudentSubCourseProgress, StudentEnrollment, Comment, Reaction } = require('../models');
 const { authenticate, teacherOnly, studentOnly } = require('../middleware/auth');
 const { validateRequest, schemas } = require('../middleware/validation');
 

@@ -93,12 +93,6 @@ Add these links in your frontend:
 </a>
 ```
 
-**For Teachers:**
-```html
-<a href="http://localhost:5001/api/auth/google/teacher">
-  Login with Google (Teacher)
-</a>
-```
 
 ### 2. Handle OAuth Callback
 Create a callback page (`/auth/callback`) in your frontend:
@@ -154,8 +148,7 @@ function AuthError() {
 ### 1. Manual Testing
 1. Start your backend server: `npm run dev`
 2. Open browser and navigate to:
-   - Student: `http://localhost:5001/api/auth/google/student`
-   - Teacher: `http://localhost:5001/api/auth/google/teacher`
+   - Student: `http://localhost:5001/api/auth/
 3. Complete Google authentication
 4. Should redirect to frontend with token
 

@@ -50,7 +50,6 @@ const schemas = {
     content_url: Joi.string().uri().required(),
     order_in_course: Joi.number().integer().min(1).required()
   }),
-
   chatMessage: Joi.object({
     message: Joi.string().min(1).required(),
     sub_course_id: Joi.number().integer().required(),
@@ -60,6 +59,17 @@ const schemas = {
   updateProgress: Joi.object({
     status: Joi.string().valid('not_started', 'in_progress', 'completed').required(),
     score: Joi.number().integer().min(0).max(100).optional()
+  }),
+
+  createComment: Joi.object({
+    sub_course_id: Joi.number().integer().positive().required(),
+    content: Joi.string().min(1).max(1000).required(),
+    parent_id: Joi.number().integer().positive().optional()
+  }),
+
+  addReaction: Joi.object({
+    sub_course_id: Joi.number().integer().positive().required(),
+    reaction_type: Joi.string().valid('happy', 'sad', 'flat').required()
   })
 };
 

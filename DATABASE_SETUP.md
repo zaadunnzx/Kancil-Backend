@@ -19,7 +19,7 @@ net start postgresql-x64-13
 psql -U postgres
 
 -- Hapus database lama
-DROP DATABASE IF EXISTS kancil_ai_db;
+DROP DATABASE IF EXISTS kancil;
 \q
 ```
 
@@ -31,7 +31,7 @@ npm run setup-fresh
 
 Script ini akan:
 - ✅ Hapus database lama jika ada
-- ✅ Buat database baru `kancil_ai_db`
+- ✅ Buat database baru `kancil`
 - ✅ Buat semua tabel dengan struktur yang benar
 - ✅ Verifikasi kolom `kelas` ada di tabel `courses`
 - ✅ Tampilkan struktur tabel yang dibuat
@@ -98,7 +98,7 @@ Pastikan file `.env` memiliki konfigurasi yang benar:
 ```env
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=kancil_ai_db
+DB_NAME=kancil
 DB_USER=postgres
 DB_PASSWORD=your_password
 ```
@@ -157,14 +157,14 @@ Ini akan membuat:
 npm run dev
 ```
 
-Server akan berjalan di `http://localhost:5000`
+Server akan berjalan di `http://localhost:5001`
 
 ## 📖 API Testing
 
 Test endpoints:
-- `GET http://localhost:5000/api/auth/me` - Test auth
-- `POST http://localhost:5000/api/auth/login` - Login
-- `GET http://localhost:5000/api/courses` - List courses
+- `GET http://localhost:5001/api/auth/me` - Test auth
+- `POST http://localhost:5001/api/auth/login` - Login
+- `GET http://localhost:5001/api/courses` - List courses
 
 ---
 **Kancil AI Backend Database Setup** ✨

@@ -87,7 +87,7 @@ npm run dev
 npm start
 ```
 
-Server akan berjalan di `http://localhost:5000`
+Server akan berjalan di `http://localhost:5001`
 
 ## 📁 Struktur Project
 
