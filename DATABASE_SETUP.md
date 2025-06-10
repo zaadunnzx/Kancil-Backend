@@ -161,10 +161,22 @@ Server akan berjalan di `http://localhost:5001`
 
 ## 📖 API Testing
 
+Import Postman collection: `postman/Kancil_AI_Complete_Collection.json`
+
 Test endpoints:
 - `GET http://localhost:5001/api/auth/me` - Test auth
 - `POST http://localhost:5001/api/auth/login` - Login
 - `GET http://localhost:5001/api/courses` - List courses
+
+**Master Collection Features:**
+- ✅ **Complete API Coverage** - All endpoints in one file
+- ✅ **Enhanced Progress System** (Quiz 0-100, Video/PDF 0-1)
+- ✅ **Comments & Reactions** system
+- ✅ **Fixed Password Change & Photo Upload**
+- ✅ **OAuth Integration** (Google Login)
+- ✅ **Advanced Analytics** (Performance, Engagement)
+- ✅ **Admin Management** (Users, Courses)
+- ✅ **Debug Tools** (Enrollment, Health Check)
 
 ---
 **Kancil AI Backend Database Setup** ✨

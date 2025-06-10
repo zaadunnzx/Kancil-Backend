@@ -69,6 +69,51 @@ const isPDFFile = (mimetype) => {
   return mimetype === 'application/pdf';
 };
 
+// Validate progress score based on content type
+const validateProgressScore = (contentType, score, status) => {
+  if (status !== 'completed') {
+    return { isValid: true, score: null };
+  }
+
+  if (contentType === 'quiz') {
+    // Quiz requires numeric score (0-100)
+    if (score === undefined || score === null) {
+      return { 
+        isValid: false, 
+        error: 'Score is required for quiz completion' 
+      };
+    }
+    
+    if (typeof score !== 'number' || score < 0 || score > 100) {
+      return { 
+        isValid: false, 
+        error: 'Quiz score must be a number between 0 and 100' 
+      };
+    }
+    
+    return { isValid: true, score: Math.round(score) };
+  } else {
+    // For video, pdf, text, etc. - only 0 or 1
+    if (score !== undefined && score !== null) {
+      if (score !== 0 && score !== 1) {
+        return { 
+          isValid: false, 
+          error: `For ${contentType} content, score must be 0 or 1` 
+        };
+      }
+      return { isValid: true, score };
+    } else {
+      // Default to 1 for completion if not provided
+      return { isValid: true, score: 1 };
+    }
+  }
+};
+
+// Get score type description based on content type
+const getScoreTypeDescription = (contentType) => {
+  return contentType === 'quiz' ? 'percentage (0-100)' : 'binary (0 or 1)';
+};
+
 module.exports = {
   generateRandomString,
   generateCourseCode,
@@ -81,5 +126,7 @@ module.exports = {
   getFileExtension,
   isImageFile,
   isVideoFile,
-  isPDFFile
+  isPDFFile,
+  validateProgressScore,
+  getScoreTypeDescription
 };

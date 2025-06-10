@@ -19,15 +19,27 @@ User.hasMany(StudentEnrollment, { foreignKey: 'student_id', as: 'enrollments' })
 
 // Course associations
 Course.belongsTo(User, { foreignKey: 'teacher_id', as: 'teacher' });
-Course.hasMany(SubCourse, { foreignKey: 'course_id', as: 'subCourses' });
-Course.hasMany(StudentEnrollment, { foreignKey: 'course_id', as: 'enrollments' });
+Course.hasMany(SubCourse, { 
+  foreignKey: 'course_id', 
+  as: 'subcourses' 
+});
+Course.hasMany(StudentEnrollment, { 
+  foreignKey: 'course_id', 
+  as: 'enrollments' 
+});
 
 // SubCourse associations
-SubCourse.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+SubCourse.belongsTo(Course, { 
+  foreignKey: 'course_id', 
+  as: 'course' 
+});
 SubCourse.hasMany(Comment, { foreignKey: 'sub_course_id', as: 'comments' });
 SubCourse.hasMany(Reaction, { foreignKey: 'sub_course_id', as: 'reactions' });
 SubCourse.hasMany(ChatbotInteraction, { foreignKey: 'sub_course_id', as: 'chatInteractions' });
-SubCourse.hasMany(StudentSubCourseProgress, { foreignKey: 'sub_course_id', as: 'progress' });
+SubCourse.hasMany(StudentSubCourseProgress, { 
+  foreignKey: 'sub_course_id', 
+  as: 'progress' 
+});
 
 // Comment associations
 Comment.belongsTo(User, { foreignKey: 'id_user', as: 'user' });
@@ -38,11 +50,24 @@ Reaction.belongsTo(User, { foreignKey: 'id_user', as: 'user' });
 Reaction.belongsTo(SubCourse, { foreignKey: 'sub_course_id', as: 'subCourse' });
 
 // StudentEnrollment associations
-StudentEnrollment.belongsTo(User, { foreignKey: 'student_id', as: 'student' });
-StudentEnrollment.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+StudentEnrollment.belongsTo(User, { 
+  foreignKey: 'student_id', 
+  as: 'student' 
+});
+StudentEnrollment.belongsTo(Course, { 
+  foreignKey: 'course_id', 
+  as: 'course' 
+});
 
 // StudentSubCourseProgress associations
-StudentSubCourseProgress.belongsTo(SubCourse, { foreignKey: 'sub_course_id', as: 'subCourse' });
+StudentSubCourseProgress.belongsTo(SubCourse, { 
+  foreignKey: 'sub_course_id', 
+  as: 'subcourse' 
+});
+StudentSubCourseProgress.belongsTo(User, { 
+  foreignKey: 'enrollment_student_id', 
+  as: 'student' 
+});
 
 // ChatbotInteraction associations
 ChatbotInteraction.belongsTo(User, { foreignKey: 'student_id', as: 'student' });

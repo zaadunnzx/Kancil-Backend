@@ -203,8 +203,7 @@ function Test-Courses {
     catch {
         Write-Error "Get course detail failed: $($_.Exception.Message)"
     }
-    
-    # Test publish course
+      # Test publish course
     Write-Status "Publishing course..."
     try {
         $response = Invoke-ApiRequest -Method PATCH -Uri "$BaseUrl/courses/$CourseId/publish" -Headers $headers
@@ -212,6 +211,26 @@ function Test-Courses {
     }
     catch {
         Write-Warning "Course publish failed: $($_.Exception.Message)"
+    }
+    
+    # Test archive course
+    Write-Status "Archiving course..."
+    try {
+        $response = Invoke-ApiRequest -Method PATCH -Uri "$BaseUrl/courses/$CourseId/archive" -Headers $headers
+        Write-Success "Course archive request sent"
+    }
+    catch {
+        Write-Warning "Course archive failed: $($_.Exception.Message)"
+    }
+    
+    # Test unarchive course
+    Write-Status "Unarchiving course..."
+    try {
+        $response = Invoke-ApiRequest -Method PATCH -Uri "$BaseUrl/courses/$CourseId/unarchive" -Headers $headers
+        Write-Success "Course unarchive request sent"
+    }
+    catch {
+        Write-Warning "Course unarchive failed: $($_.Exception.Message)"
     }
     
     return $true

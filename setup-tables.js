@@ -5,6 +5,11 @@ async function runMigrations() {
   const queryInterface = sequelize.getQueryInterface();
   
   try {
+    // Test database connection first
+    console.log('Testing database connection...');
+    await sequelize.authenticate();
+    console.log('✅ Database connection successful!');
+    
     console.log('Creating comments table...');
     
     // Create comments table
@@ -130,13 +135,77 @@ async function runMigrations() {
     
     await queryInterface.addIndex('reactions', ['id_user'], {
       name: 'idx_reactions_user'
-    });
+    });    console.log('Updating student progress table with enhanced scoring...');
+    
+    // Add new columns to student_sub_course_progress for enhanced scoring
+    try {
+      await queryInterface.addColumn('student_sub_course_progress', 'completion_percentage', {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false
+      });
+      console.log('✅ Added completion_percentage column');
+    } catch (error) {
+      console.log('⚠️ Column completion_percentage already exists, skipping...');
+    }
+
+    try {
+      await queryInterface.addColumn('student_sub_course_progress', 'time_spent', {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false
+      });
+      console.log('✅ Added time_spent column');
+    } catch (error) {
+      console.log('⚠️ Column time_spent already exists, skipping...');
+    }
+
+    try {
+      await queryInterface.addColumn('student_sub_course_progress', 'attempts', {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false
+      });
+      console.log('✅ Added attempts column');
+    } catch (error) {
+      console.log('⚠️ Column attempts already exists, skipping...');
+    }
+
+    try {
+      await queryInterface.addColumn('student_sub_course_progress', 'quiz_answers', {
+        type: Sequelize.JSON,
+        allowNull: true
+      });
+      console.log('✅ Added quiz_answers column');
+    } catch (error) {
+      console.log('⚠️ Column quiz_answers already exists, skipping...');
+    }
+
+    // Update score column to DECIMAL for better precision
+    try {
+      await queryInterface.changeColumn('student_sub_course_progress', 'score', {
+        type: Sequelize.DECIMAL(5, 2),
+        allowNull: true
+      });
+      console.log('✅ Updated score column to DECIMAL(5,2)');
+    } catch (error) {
+      console.log('⚠️ Score column already updated, skipping...');
+    }
 
     console.log('✅ All migrations completed successfully!');
     process.exit(0);
     
   } catch (error) {
     console.error('❌ Migration failed:', error);
+    if (error.name === 'SequelizeConnectionError') {
+      console.error('\n🔧 Database Connection Error Solutions:');
+      console.error('1. Check your database credentials in config/database.js');
+      console.error('2. Ensure PostgreSQL server is running');
+      console.error('3. Verify database name, username, and password');
+      console.error('4. Check if password is properly quoted as string');
+      console.error('\n📝 Alternative: Run SQL manually:');
+      console.error('Use the SQL commands in MANUAL_SETUP.sql file');
+    }
     process.exit(1);
   }
 }

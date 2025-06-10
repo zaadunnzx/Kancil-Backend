@@ -172,6 +172,8 @@ GET {{baseUrl}}/courses
 Authorization: Bearer {{token}}
 
 Query Params (optional):
+- page: 1
+- limit: 10
 - subject: Matematika
 - kelas: 5
 - teacher_id: uuid
@@ -269,6 +271,34 @@ curl -X PATCH http://localhost:5001/api/courses/1/publish \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
+### 2.6 Archive Course
+
+**Postman:**
+```
+PATCH {{baseUrl}}/courses/{{course_id}}/archive
+Authorization: Bearer {{token}}
+```
+
+**curl:**
+```bash
+curl -X PATCH http://localhost:5001/api/courses/1/archive \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 2.7 Unarchive Course
+
+**Postman:**
+```
+PATCH {{baseUrl}}/courses/{{course_id}}/unarchive
+Authorization: Bearer {{token}}
+```
+
+**curl:**
+```bash
+curl -X PATCH http://localhost:5001/api/courses/1/unarchive \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
 ### 2.6 Join Course (Student only)
 
 **Postman:**
@@ -308,6 +338,70 @@ curl -X GET http://localhost:5001/api/subcourses/course/1 \
 ```
 
 ### 3.2 Create SubCourse (Teacher only)
+
+**Postman:**
+```
+POST {{baseUrl}}/subcourses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+Body (raw JSON):
+{
+  "course_id": {{course_id}},
+  "title": "Video Pembelajaran Matematika Dasar",
+  "summary": "Video pengenalan angka 1-10",
+  "content_type": "video",
+  "content_url": "https://example.com/video/angka-1-10",
+  "order_in_course": 1
+}
+```
+
+### 3.3 Update Progress (Student only)
+
+**Scoring Rules:**
+- **Quiz**: Score 0-100 (percentage)
+- **Video/PDF/Text**: Score 0 or 1 (binary completion)
+
+**For Video/PDF completion:**
+```
+PATCH {{baseUrl}}/subcourses/{{subcourse_id}}/progress
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+Body (raw JSON):
+{
+  "status": "completed",
+  "score": 1
+}
+```
+
+**For Quiz completion:**
+```
+PATCH {{baseUrl}}/subcourses/{{subcourse_id}}/progress
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+Body (raw JSON):
+{
+  "status": "completed",
+  "score": 85
+}
+```
+
+**curl examples:**
+```bash
+# Complete video/PDF (binary scoring)
+curl -X PATCH http://localhost:5001/api/subcourses/1/progress \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "completed", "score": 1}'
+
+# Complete quiz (percentage scoring)
+curl -X PATCH http://localhost:5001/api/subcourses/1/progress \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "completed", "score": 85}'
+```
 
 **Postman:**
 ```
@@ -769,6 +863,7 @@ Kancil AI API/
 │   ├── Get Course Detail
 │   ├── Update Course
 │   ├── Publish Course
+│   ├── Archive Course
 │   └── Join Course
 ├── SubCourses/
 │   ├── Get SubCourses

@@ -830,6 +830,30 @@ export const publishCourse = async (courseId) => {
 };
 ```
 
+**Archive Course:**
+```javascript
+export const archiveCourse = async (courseId) => {
+  try {
+    const response = await apiClient.patch(`/courses/${courseId}/archive`);
+    return response.data.course;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+```
+
+**Unarchive Course:**
+```javascript
+export const unarchiveCourse = async (courseId) => {
+  try {
+    const response = await apiClient.patch(`/courses/${courseId}/unarchive`);
+    return response.data.course;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+```
+
 ## 📖 SubCourses API
 
 ### 1. Get SubCourses for Course

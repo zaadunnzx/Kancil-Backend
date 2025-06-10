@@ -98,7 +98,22 @@ router.get('/:id', authenticate, async (req, res, next) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    res.json({ subCourse });
+    // Cari subcourse selanjutnya berdasarkan order_in_course
+    const nextSubCourse = await SubCourse.findOne({
+      where: {
+        course_id: subCourse.course_id,
+        order_in_course: subCourse.order_in_course + 1
+      }
+    });
+
+    res.json({
+      subCourse,
+      nextActivity: nextSubCourse ? {
+        id: nextSubCourse.id,
+        title: nextSubCourse.title,
+        content_type: nextSubCourse.content_type
+      } : null
+    });
   } catch (error) {
     next(error);
   }
@@ -220,24 +235,182 @@ router.patch('/:id/progress', authenticate, studentOnly, async (req, res, next) 
           }
         });
       }
-    }
-
-    // Update or create progress
-    const [progress, created] = await StudentSubCourseProgress.upsert({
+    }    // Validate score based on content type
+    let validatedScore = null;
+    
+    if (status === 'completed') {
+      if (subCourse.content_type === 'quiz') {
+        // Quiz requires numeric score (0-100)
+        if (score === undefined || score === null) {
+          return res.status(400).json({ 
+            error: 'Score is required for quiz completion',
+            content_type: subCourse.content_type,
+            expected_score_format: 'number between 0-100'
+          });
+        }
+        
+        if (typeof score !== 'number' || score < 0 || score > 100) {
+          return res.status(400).json({ 
+            error: 'Quiz score must be a number between 0 and 100',
+            content_type: subCourse.content_type,
+            received_score: score,
+            expected_score_format: 'number between 0-100'
+          });
+        }
+        
+        validatedScore = Math.round(score);
+      } else {
+        // For video, pdf_material, text, audio, image, pdf - only 0 or 1
+        if (score !== undefined && score !== null) {
+          if (score !== 0 && score !== 1) {
+            return res.status(400).json({ 
+              error: `For ${subCourse.content_type} content, score must be 0 (incomplete) or 1 (complete)`,
+              content_type: subCourse.content_type,
+              received_score: score,
+              expected_score_format: '0 or 1 only'
+            });
+          }
+          validatedScore = score;
+        } else {
+          // Default to 1 for completion if not provided
+          validatedScore = 1;
+        }
+      }
+    }    const progressData = {
       enrollment_student_id: req.user.id_user,
       enrollment_course_id: subCourse.course_id,
       sub_course_id: subCourseId,
       status: status || 'in_progress',
-      score: score || null,
+      score: validatedScore,
       last_accessed_at: new Date()
+    };
+
+    // Set completion timestamp
+    if (status === 'completed') {
+      progressData.completed_at = new Date();
+    } else if (status === 'in_progress') {
+      progressData.started_at = new Date();
+    }
+
+    // Use findOrCreate to avoid upsert issues with timestamps
+    const [progress, created] = await StudentSubCourseProgress.findOrCreate({
+      where: {
+        enrollment_student_id: req.user.id_user,
+        enrollment_course_id: subCourse.course_id,
+        sub_course_id: subCourseId
+      },
+      defaults: progressData
+    });
+
+    // If not created, update the existing record
+    if (!created) {
+      await progress.update(progressData);
+    }    // Get the updated progress with subcourse info
+    const updatedProgress = await StudentSubCourseProgress.findOne({
+      where: {
+        enrollment_student_id: req.user.id_user,
+        sub_course_id: subCourseId
+      },
+      include: [
+        {
+          model: SubCourse,
+          as: 'subcourse',
+          attributes: ['id', 'title', 'content_type']
+        }
+      ]
     });
 
     res.json({
-      message: created ? 'Progress created' : 'Progress updated',
-      progress
+      message: created ? 'Progress created successfully' : 'Progress updated successfully',
+      progress: updatedProgress,
+      scoring_info: {
+        content_type: subCourse.content_type,
+        score_type: subCourse.content_type === 'quiz' ? 'percentage (0-100)' : 'binary (0 or 1)',
+        actual_score: validatedScore,
+        scoring_rules: {
+          quiz: 'Requires numeric score between 0-100 (percentage)',
+          video: 'Binary score: 0 (not watched) or 1 (watched)',
+          pdf_material: 'Binary score: 0 (not read) or 1 (read)',
+          text: 'Binary score: 0 (not read) or 1 (read)',
+          audio: 'Binary score: 0 (not listened) or 1 (listened)',
+          image: 'Binary score: 0 (not viewed) or 1 (viewed)',
+          pdf: 'Binary score: 0 (not read) or 1 (read)'
+        }
+      }
     });
   } catch (error) {
     next(error);
+  }
+});
+
+// Get student progress with detailed scoring
+router.get('/:id/progress', authenticate, studentOnly, async (req, res, next) => {
+  try {
+    const subCourseId = req.params.id;
+    const studentId = req.user.id_user;
+
+    // Get subcourse with course info
+    const subCourse = await SubCourse.findByPk(subCourseId, {
+      include: [{ model: Course, as: 'course' }]
+    });
+
+    if (!subCourse) {
+      return res.status(404).json({ error: 'SubCourse not found' });
+    }
+
+    // Check enrollment
+    const enrollment = await StudentEnrollment.findOne({
+      where: {
+        student_id: studentId,
+        course_id: subCourse.course_id
+      }
+    });
+
+    if (!enrollment) {
+      return res.status(403).json({ error: 'Not enrolled in this course' });
+    }
+
+    // Get progress
+    const progress = await StudentSubCourseProgress.findOne({
+      where: {
+        enrollment_student_id: studentId,
+        enrollment_course_id: subCourse.course_id,
+        sub_course_id: subCourseId
+      }
+    });
+
+    // Format response based on content type
+    const responseData = {
+      sub_course_id: parseInt(subCourseId),
+      content_type: subCourse.content_type,
+      status: progress ? progress.status : 'not_started',
+      completion_percentage: progress ? progress.completion_percentage : 0,
+      time_spent: progress ? progress.time_spent : 0,
+      attempts: progress ? progress.attempts : 0,
+      last_accessed_at: progress ? progress.last_accessed_at : null,
+      completed_at: progress ? progress.completed_at : null
+    };
+
+    // Add score based on content type
+    if (subCourse.content_type === 'quiz') {
+      responseData.score = progress ? progress.score : null;
+      responseData.quiz_answers = progress ? progress.quiz_answers : null;
+    } else {
+      // For video/pdf: return binary completion (0 or 1)
+      responseData.completed = progress && progress.score === 1.0 ? 1 : 0;
+    }
+
+    res.json({
+      message: 'Progress retrieved successfully',
+      data: responseData
+    });
+
+  } catch (error) {
+    console.error('Error fetching progress:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   }
 });
 

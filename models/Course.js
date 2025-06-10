@@ -51,8 +51,11 @@ const Course = sequelize.define('Course', {
   end_date: {
     type: DataTypes.DATE,
     allowNull: true
+  },  published_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   },
-  published_at: {
+  archived_at: {
     type: DataTypes.DATE,
     allowNull: true
   }

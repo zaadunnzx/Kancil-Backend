@@ -41,8 +41,7 @@ const schemas = {
     kelas: Joi.number().integer().min(1).max(12).required(),
     start_date: Joi.date().optional(),
     end_date: Joi.date().greater(Joi.ref('start_date')).optional()
-  }),
-  createSubCourse: Joi.object({
+  }),  createSubCourse: Joi.object({
     course_id: Joi.number().integer().positive().required(),
     title: Joi.string().min(3).max(255).required(),
     summary: Joi.string().optional(),
@@ -54,11 +53,22 @@ const schemas = {
     message: Joi.string().min(1).required(),
     sub_course_id: Joi.number().integer().required(),
     message_type: Joi.string().valid('text', 'speech_input').default('text')
-  }),
-
-  updateProgress: Joi.object({
+  }),  updateProgress: Joi.object({
     status: Joi.string().valid('not_started', 'in_progress', 'completed').required(),
-    score: Joi.number().integer().min(0).max(100).optional()
+    score: Joi.alternatives().try(
+      Joi.number().min(0).max(100).when('...', {
+        is: Joi.object({ status: 'completed' }).unknown(),
+        then: Joi.when('content_type', {
+          is: 'quiz',
+          then: Joi.required(),
+          otherwise: Joi.valid(0, 1).optional()
+        }),
+        otherwise: Joi.optional()
+      }),
+      Joi.valid(0, 1),
+      Joi.allow(null)
+    ).optional(),
+    content_type: Joi.string().valid('video', 'quiz', 'pdf_material', 'text', 'audio', 'image', 'pdf').optional()
   }),
 
   createComment: Joi.object({

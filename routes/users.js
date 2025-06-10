@@ -1,6 +1,8 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const { User, Course, StudentEnrollment } = require('../models');
 const { authenticate, authorize } = require('../middleware/auth');
+const { validateRequest, schemas } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -26,20 +28,12 @@ router.get('/', authenticate, async (req, res, next) => {
 router.get('/profile', authenticate, async (req, res, next) => {
   try {
     const user = await User.findByPk(req.user.id_user, {
-      attributes: { exclude: ['password_hash', 'google_id'] },
-      include: req.user.role === 'student' ? [
-        {
-          model: StudentEnrollment,
-          as: 'enrollments',
-          include: [{ model: Course, as: 'course' }]
-        }
-      ] : [
-        {
-          model: Course,
-          as: 'teacherCourses'
-        }
-      ]
+      attributes: { exclude: ['password_hash'] }
     });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     res.json({ user });
   } catch (error) {
@@ -50,30 +44,27 @@ router.get('/profile', authenticate, async (req, res, next) => {
 // Update user profile
 router.put('/profile', authenticate, async (req, res, next) => {
   try {
-    const { nama_lengkap, kelas, nama_sekolah } = req.body;
-    
+    const { nama_lengkap, nama_sekolah, kelas } = req.body;
     const user = await User.findByPk(req.user.id_user);
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    await user.update({
-      nama_lengkap: nama_lengkap || user.nama_lengkap,
-      kelas: req.user.role === 'student' ? (kelas || user.kelas) : user.kelas,
-      nama_sekolah: nama_sekolah || user.nama_sekolah
+    const updateData = {};
+    if (nama_lengkap) updateData.nama_lengkap = nama_lengkap;
+    if (nama_sekolah) updateData.nama_sekolah = nama_sekolah;
+    if (kelas && user.role === 'student') updateData.kelas = kelas;
+
+    await user.update(updateData);
+
+    const updatedUser = await User.findByPk(req.user.id_user, {
+      attributes: { exclude: ['password_hash'] }
     });
 
-    res.json({ 
+    res.json({
       message: 'Profile updated successfully',
-      user: {
-        id: user.id_user,
-        nama_lengkap: user.nama_lengkap,
-        email: user.email,
-        role: user.role,
-        kelas: user.kelas,
-        nama_sekolah: user.nama_sekolah,
-        foto_profil_url: user.foto_profil_url
-      }
+      user: updatedUser
     });
   } catch (error) {
     next(error);
@@ -83,36 +74,33 @@ router.put('/profile', authenticate, async (req, res, next) => {
 // Change password
 router.put('/change-password', authenticate, async (req, res, next) => {
   try {
-    const { old_password, new_password } = req.body;
-    
+    const { current_password, new_password } = req.body;
+
     // Validate input
-    if (!old_password || !new_password) {
+    if (!current_password || !new_password) {
       return res.status(400).json({ 
-        error: 'Both old_password and new_password are required' 
+        error: 'Current password and new password are required' 
       });
     }
 
-    // Validate new password length
     if (new_password.length < 6) {
       return res.status(400).json({ 
         error: 'New password must be at least 6 characters long' 
       });
     }
 
-    // Get user with password hash
-    const bcrypt = require('bcryptjs');
     const user = await User.findByPk(req.user.id_user);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Verify old password
-    const isOldPasswordValid = await bcrypt.compare(old_password, user.password_hash);
-    if (!isOldPasswordValid) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(current_password, user.password_hash);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
     }
 
-    // Check if new password is different from old password
+    // Check if new password is different from current
     const isSamePassword = await bcrypt.compare(new_password, user.password_hash);
     if (isSamePassword) {
       return res.status(400).json({ 
@@ -121,17 +109,17 @@ router.put('/change-password', authenticate, async (req, res, next) => {
     }
 
     // Hash new password
-    const newPasswordHash = await bcrypt.hash(new_password, 12);
+    const saltRounds = 12;
+    const newPasswordHash = await bcrypt.hash(new_password, saltRounds);
 
     // Update password
-    await user.update({
+    await user.update({ 
       password_hash: newPasswordHash,
       updated_at: new Date()
     });
 
-    res.json({ 
-      message: 'Password changed successfully',
-      timestamp: new Date().toISOString()
+    res.json({
+      message: 'Password changed successfully'
     });
   } catch (error) {
     next(error);

@@ -61,8 +61,7 @@ router.get('/my-courses', authenticate, teacherOnly, async (req, res, next) => {
     if (status) whereClause.status = status;
 
     const { count, rows: courses } = await Course.findAndCountAll({
-      where: whereClause,
-      include: [
+      where: whereClause,      include: [
         {
           model: User,
           as: 'teacher',
@@ -70,7 +69,7 @@ router.get('/my-courses', authenticate, teacherOnly, async (req, res, next) => {
         },
         {
           model: SubCourse,
-          as: 'subCourses',
+          as: 'subcourses',
           attributes: ['id', 'title', 'content_type', 'order_in_course']
         },
         {
@@ -88,12 +87,10 @@ router.get('/my-courses', authenticate, teacherOnly, async (req, res, next) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['created_at', 'DESC']]
-    });
-
-    // Calculate statistics for each course
+    });    // Calculate statistics for each course
     const coursesWithStats = courses.map(course => {
       const enrollmentCount = course.enrollments ? course.enrollments.length : 0;
-      const subCourseCount = course.subCourses ? course.subCourses.length : 0;
+      const subCourseCount = course.subcourses ? course.subcourses.length : 0;
       
       return {
         ...course.toJSON(),
@@ -125,13 +122,31 @@ router.get('/', authenticate, async (req, res, next) => {
     const offset = (page - 1) * limit;
 
     const whereClause = {};
-    if (subject) whereClause.subject = subject;
-    if (kelas) whereClause.kelas = kelas;
-    if (status) whereClause.status = status;
-
-    // Students only see published courses
+    
+    // Apply filters based on user role
     if (req.user.role === 'student') {
+      // Students only see published courses
       whereClause.status = 'published';
+      
+      // Apply additional filters if provided
+      if (subject) whereClause.subject = subject;
+      if (kelas) whereClause.kelas = kelas;
+      // Note: status filter is ignored for students as they can only see published
+      
+    } else if (req.user.role === 'teacher') {
+      // Teachers only see their own courses (any status)
+      whereClause.teacher_id = req.user.id_user;
+      
+      // Apply additional filters if provided
+      if (subject) whereClause.subject = subject;
+      if (kelas) whereClause.kelas = kelas;
+      if (status) whereClause.status = status;
+      
+    } else {
+      // For admin or other roles - see all courses (fallback)
+      if (subject) whereClause.subject = subject;
+      if (kelas) whereClause.kelas = kelas;
+      if (status) whereClause.status = status;
     }
 
     const { count, rows: courses } = await Course.findAndCountAll({
@@ -144,7 +159,7 @@ router.get('/', authenticate, async (req, res, next) => {
         },
         {
           model: SubCourse,
-          as: 'subCourses',
+          as: 'subcourses',
           attributes: ['id', 'title', 'content_type', 'order_in_course']
         }
       ],
@@ -160,6 +175,14 @@ router.get('/', authenticate, async (req, res, next) => {
         page: parseInt(page),
         limit: parseInt(limit),
         totalPages: Math.ceil(count / limit)
+      },
+      filter_info: {
+        user_role: req.user.role,
+        applied_filters: req.user.role === 'student' 
+          ? 'Only published courses visible to students'
+          : req.user.role === 'teacher' 
+          ? 'Only your own courses visible'
+          : 'All courses visible'
       }
     });
   } catch (error) {
@@ -176,10 +199,9 @@ router.get('/:id', authenticate, async (req, res, next) => {
           model: User,
           as: 'teacher',
           attributes: ['id_user', 'nama_lengkap', 'email']
-        },
-        {
+        },        {
           model: SubCourse,
-          as: 'subCourses',
+          as: 'subcourses',
           order: [['order_in_course', 'ASC']]
         }
       ]
@@ -311,6 +333,65 @@ router.patch('/:id/publish', authenticate, teacherOnly, async (req, res, next) =
     });
 
     res.json({ message: 'Course published successfully', course });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Archive course (teacher only)
+router.patch('/:id/archive', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const course = await Course.findByPk(req.params.id);
+    
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.teacher_id !== req.user.id_user) {
+      return res.status(403).json({ error: 'Not authorized to archive this course' });
+    }
+
+    // Only published or draft courses can be archived
+    if (course.status === 'archived') {
+      return res.status(400).json({ error: 'Course is already archived' });
+    }
+
+    await course.update({
+      status: 'archived',
+      archived_at: new Date()
+    });
+
+    res.json({ message: 'Course archived successfully', course });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Unarchive course (teacher only)
+router.patch('/:id/unarchive', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const course = await Course.findByPk(req.params.id);
+    
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.teacher_id !== req.user.id_user) {
+      return res.status(403).json({ error: 'Not authorized to unarchive this course' });
+    }
+
+    // Only archived courses can be unarchived
+    if (course.status !== 'archived') {
+      return res.status(400).json({ error: 'Course is not archived' });
+    }
+
+    // Unarchive to draft status by default
+    await course.update({
+      status: 'draft',
+      archived_at: null
+    });
+
+    res.json({ message: 'Course unarchived successfully', course });
   } catch (error) {
     next(error);
   }
