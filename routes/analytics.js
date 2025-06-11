@@ -1,4 +1,5 @@
 const express = require('express');
+const { Op } = require('sequelize');
 const { 
   User, 
   Course, 
@@ -8,7 +9,6 @@ const {
   ChatInteraction 
 } = require('../models');
 const { authenticate, teacherOnly } = require('../middleware/auth');
-const { Op } = require('sequelize');
 
 const router = express.Router();
 
@@ -453,13 +453,16 @@ router.get('/teacher/registered-students', authenticate, teacherOnly, async (req
     const teacherId = req.user.id_user;
     const courses = await Course.findAll({ where: { teacher_id: teacherId }, attributes: ['id'] });
     const courseIds = courses.map(c => c.id);
-    if (courseIds.length === 0) return res.json({ count: 0 });
+    if (courseIds.length === 0) return res.json({ registered_students_count: 0, courses_count: 0 });
     const enrollments = await StudentEnrollment.findAll({
       where: { course_id: courseIds },
       attributes: ['student_id'],
       group: ['student_id']
     });
-    res.json({ count: enrollments.length });
+    res.json({ 
+      registered_students_count: enrollments.length,
+      courses_count: courseIds.length
+    });
   } catch (error) {
     next(error);
   }
@@ -471,14 +474,17 @@ router.get('/teacher/completed-quizzes', authenticate, teacherOnly, async (req, 
     const teacherId = req.user.id_user;
     const courses = await Course.findAll({ where: { teacher_id: teacherId }, attributes: ['id'] });
     const courseIds = courses.map(c => c.id);
-    if (courseIds.length === 0) return res.json({ count: 0 });
+    if (courseIds.length === 0) return res.json({ completed_quizzes_count: 0, total_quiz_subcourses: 0 });
     const quizzes = await SubCourse.findAll({ where: { course_id: courseIds, content_type: 'quiz' }, attributes: ['id'] });
     const quizIds = quizzes.map(q => q.id);
-    if (quizIds.length === 0) return res.json({ count: 0 });
+    if (quizIds.length === 0) return res.json({ completed_quizzes_count: 0, total_quiz_subcourses: 0 });
     const completedCount = await StudentSubCourseProgress.count({
       where: { sub_course_id: quizIds, status: 'completed' }
     });
-    res.json({ count: completedCount });
+    res.json({ 
+      completed_quizzes_count: completedCount,
+      total_quiz_subcourses: quizzes.length
+    });
   } catch (error) {
     next(error);
   }
@@ -488,21 +494,99 @@ router.get('/teacher/completed-quizzes', authenticate, teacherOnly, async (req, 
 router.get('/teacher/average-quiz-score', authenticate, teacherOnly, async (req, res, next) => {
   try {
     const teacherId = req.user.id_user;
-    const courses = await Course.findAll({ where: { teacher_id: teacherId }, attributes: ['id'] });
-    const courseIds = courses.map(c => c.id);
-    if (courseIds.length === 0) return res.json({ average: 0 });
-    const quizzes = await SubCourse.findAll({ where: { course_id: courseIds, content_type: 'quiz' }, attributes: ['id'] });
-    const quizIds = quizzes.map(q => q.id);
-    if (quizIds.length === 0) return res.json({ average: 0 });
-    const progresses = await StudentSubCourseProgress.findAll({
-      where: { sub_course_id: quizIds, status: 'completed' },
-      attributes: ['score']
+    
+    // Debug: Log teacher ID
+    console.log('Teacher ID:', teacherId);
+    
+    // Get all courses by teacher
+    const courses = await Course.findAll({ 
+      where: { teacher_id: teacherId }, 
+      attributes: ['id', 'title'] 
     });
-    if (progresses.length === 0) return res.json({ average: 0 });
-    const totalScore = progresses.reduce((sum, p) => sum + (p.score || 0), 0);
-    const avg = Math.round((totalScore / progresses.length) * 100) / 100;
-    res.json({ average: avg });
+    
+    console.log('Teacher courses found:', courses.length);
+    const courseIds = courses.map(c => c.id);
+    
+    if (courseIds.length === 0) {
+      return res.json({ 
+        average_quiz_score: 0,
+        total_completed_quizzes: 0,
+        debug: 'No courses found for teacher'
+      });
+    }
+    
+    // Get all quiz subcourses from teacher's courses
+    const quizzes = await SubCourse.findAll({ 
+      where: { 
+        course_id: courseIds, 
+        content_type: 'quiz' 
+      }, 
+      attributes: ['id', 'title', 'course_id'] 
+    });
+    
+    console.log('Quiz subcourses found:', quizzes.length);
+    const quizIds = quizzes.map(q => q.id);
+    
+    if (quizIds.length === 0) {
+      return res.json({ 
+        average_quiz_score: 0,
+        total_completed_quizzes: 0,
+        debug: 'No quiz subcourses found'
+      });
+    }
+    
+    // Get all completed quiz progresses
+    const progresses = await StudentSubCourseProgress.findAll({
+      where: { 
+        sub_course_id: quizIds, 
+        status: 'completed',
+        score: { [Op.not]: null } // Ensure score is not null
+      },
+      attributes: ['score', 'sub_course_id'],
+      include: [{
+        model: SubCourse,
+        as: 'subcourse',
+        attributes: ['title'],
+        required: false
+      }]
+    });
+    
+    console.log('Completed quiz progresses found:', progresses.length);
+    
+    if (progresses.length === 0) {
+      return res.json({ 
+        average_quiz_score: 0,
+        total_completed_quizzes: 0,
+        debug: 'No completed quiz progresses found'
+      });
+    }
+    
+    // Calculate average score
+    const validScores = progresses
+      .map(p => parseFloat(p.score))
+      .filter(score => !isNaN(score) && score >= 0 && score <= 100);
+    
+    console.log('Valid scores:', validScores);
+    
+    if (validScores.length === 0) {
+      return res.json({ 
+        average_quiz_score: 0,
+        total_completed_quizzes: progresses.length,
+        debug: 'No valid scores found'
+      });
+    }
+    
+    const totalScore = validScores.reduce((sum, score) => sum + score, 0);
+    const averageScore = Math.round((totalScore / validScores.length) * 100) / 100;
+    
+    res.json({ 
+      average_quiz_score: averageScore,
+      total_completed_quizzes: validScores.length,
+      total_quiz_subcourses: quizzes.length,
+      courses_count: courses.length
+    });
   } catch (error) {
+    console.error('Error in average-quiz-score:', error);
     next(error);
   }
 });
@@ -918,42 +1002,85 @@ router.get('/teacher/average-quiz-score', authenticate, async (req, res, next) =
       return res.status(403).json({ error: 'Access denied. Teacher only.' });
     }
 
+    const teacherId = req.user.id_user;
+    console.log('Teacher ID:', teacherId);
+
     // Ambil semua course milik teacher
     const teacherCourses = await Course.findAll({
-      where: { teacher_id: req.user.id_user },
-      include: [{
-        model: SubCourse,
-        as: 'subcourses',
-        where: { content_type: 'quiz' },
-        required: false
-      }]
+      where: { teacher_id: teacherId },
+      attributes: ['id', 'title']
     });
 
-    // Kumpulkan semua quiz subcourse IDs
-    const quizSubCourseIds = teacherCourses.flatMap(course => 
-      course.subcourses.map(sub => sub.id)
-    );
+    console.log('Teacher courses found:', teacherCourses.length);
 
-    // Ambil semua quiz progress yang completed
+    if (teacherCourses.length === 0) {
+      return res.json({
+        average_quiz_score: 0,
+        total_completed_quizzes: 0,
+        total_quiz_subcourses: 0,
+        courses_count: 0,
+        debug: 'No courses found for teacher'
+      });
+    }
+
+    const courseIds = teacherCourses.map(course => course.id);
+
+    // Ambil semua quiz subcourses dari course milik teacher
+    const quizSubCourses = await SubCourse.findAll({
+      where: {
+        course_id: courseIds,
+        content_type: 'quiz'
+      },
+      attributes: ['id', 'title', 'course_id']
+    });
+
+    console.log('Quiz subcourses found:', quizSubCourses.length);
+
+    if (quizSubCourses.length === 0) {
+      return res.json({
+        average_quiz_score: 0,
+        total_completed_quizzes: 0,
+        total_quiz_subcourses: 0,
+        courses_count: teacherCourses.length,
+        debug: 'No quiz subcourses found'
+      });
+    }
+
+    const quizSubCourseIds = quizSubCourses.map(sub => sub.id);
+
+    // Ambil semua quiz progress yang completed dengan score valid
     const completedQuizProgresses = await StudentSubCourseProgress.findAll({
       where: {
         sub_course_id: quizSubCourseIds,
-        status: 'completed'
+        status: 'completed',
+        score: { [Op.not]: null }
       },
-      attributes: ['score']
+      attributes: ['score', 'sub_course_id']
     });
 
+    console.log('Completed quiz progresses found:', completedQuizProgresses.length);
+
+    // Filter scores yang valid (0-100)
+    const validScores = completedQuizProgresses
+      .map(progress => parseFloat(progress.score))
+      .filter(score => !isNaN(score) && score >= 0 && score <= 100);
+
+    console.log('Valid scores:', validScores);
+
     let averageScore = 0;
-    if (completedQuizProgresses.length > 0) {
-      const totalScore = completedQuizProgresses.reduce((sum, progress) => sum + (progress.score || 0), 0);
-      averageScore = Math.round(totalScore / completedQuizProgresses.length);
+    if (validScores.length > 0) {
+      const totalScore = validScores.reduce((sum, score) => sum + score, 0);
+      averageScore = Math.round(totalScore / validScores.length);
     }
 
     res.json({
       average_quiz_score: averageScore,
-      total_completed_quizzes: completedQuizProgresses.length
+      total_completed_quizzes: validScores.length,
+      total_quiz_subcourses: quizSubCourses.length,
+      courses_count: teacherCourses.length
     });
   } catch (error) {
+    console.error('Error in average-quiz-score:', error);
     next(error);
   }
 });

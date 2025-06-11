@@ -11,6 +11,7 @@
     "setup-fresh": "node scripts/setup-fresh-db.js",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
+    "seed:quiz": "node scripts/seed-quiz-questions.js",
     "reset-db": "node scripts/reset-db.js",
     "force-reset": "node scripts/force-reset.js",
     "check-db": "node scripts/check-db.js"

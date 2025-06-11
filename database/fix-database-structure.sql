@@ -29,7 +29,21 @@ BEGIN
     END IF;
 END $$;
 
--- 2. CREATE OR UPDATE TRIGGER FOR AUTO-UPDATE TIMESTAMPS
+-- 2. ADD ARCHIVED_AT COLUMN TO COURSES TABLE
+DO $$
+BEGIN
+    -- Check and add archived_at column to courses
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'courses' 
+        AND column_name = 'archived_at'
+    ) THEN
+        ALTER TABLE courses 
+        ADD COLUMN archived_at TIMESTAMP WITH TIME ZONE;
+    END IF;
+END $$;
+
+-- 3. CREATE OR UPDATE TRIGGER FOR AUTO-UPDATE TIMESTAMPS
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -45,7 +59,7 @@ CREATE TRIGGER update_student_sub_course_progress_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- 3. FIX EXISTING DATA - SET TIMESTAMPS FOR NULL VALUES
+-- 4. FIX EXISTING DATA - SET TIMESTAMPS FOR NULL VALUES
 UPDATE student_sub_course_progress 
 SET created_at = CURRENT_TIMESTAMP 
 WHERE created_at IS NULL;
@@ -54,7 +68,7 @@ UPDATE student_sub_course_progress
 SET updated_at = CURRENT_TIMESTAMP 
 WHERE updated_at IS NULL;
 
--- 4. VERIFY TABLE STRUCTURE
+-- 5. VERIFY TABLE STRUCTURE
 SELECT 
     column_name, 
     data_type, 
@@ -64,7 +78,7 @@ FROM information_schema.columns
 WHERE table_name = 'student_sub_course_progress'
 ORDER BY ordinal_position;
 
--- 5. CHECK FOREIGN KEY CONSTRAINTS
+-- 6. CHECK FOREIGN KEY CONSTRAINTS
 SELECT
     tc.table_name, 
     kcu.column_name, 
@@ -81,7 +95,7 @@ FROM
 WHERE tc.constraint_type = 'FOREIGN KEY' 
     AND tc.table_name = 'student_sub_course_progress';
 
--- 6. VERIFY COURSES TABLE HAS CORRECT STRUCTURE
+-- 7. VERIFY COURSES TABLE HAS CORRECT STRUCTURE
 SELECT 
     column_name, 
     data_type, 
@@ -90,7 +104,7 @@ FROM information_schema.columns
 WHERE table_name = 'courses'
 ORDER BY ordinal_position;
 
--- 7. VERIFY SUBCOURSES TABLE HAS CORRECT STRUCTURE  
+-- 8. VERIFY SUBCOURSES TABLE HAS CORRECT STRUCTURE  
 SELECT 
     column_name, 
     data_type, 
@@ -99,7 +113,7 @@ FROM information_schema.columns
 WHERE table_name = 'subcourses'
 ORDER BY ordinal_position;
 
--- 8. VERIFY STUDENT_ENROLLMENT TABLE
+-- 9. VERIFY STUDENT_ENROLLMENT TABLE
 SELECT 
     column_name, 
     data_type, 
@@ -108,7 +122,7 @@ FROM information_schema.columns
 WHERE table_name = 'student_enrollment'
 ORDER BY ordinal_position;
 
--- 9. CHECK DATA INTEGRITY
+-- 10. CHECK DATA INTEGRITY
 SELECT 
     'student_sub_course_progress' as table_name,
     COUNT(*) as total_records,
@@ -134,7 +148,7 @@ SELECT
     COUNT(CASE WHEN updated_at IS NULL THEN 1 END) as null_updated_at
 FROM subcourses;
 
--- 10. FIX SAMPLE DATA FOR TESTING (Optional)
+-- 11. FIX SAMPLE DATA FOR TESTING (Optional)
 -- Insert sample data if tables are empty
 DO $$
 BEGIN
@@ -161,7 +175,7 @@ BEGIN
     END IF;
 END $$;
 
--- 11. FINAL VERIFICATION
+-- 12. FINAL VERIFICATION
 SELECT 
     t.table_name,
     t.table_type,

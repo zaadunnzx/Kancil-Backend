@@ -19,6 +19,7 @@ const chatRoutes = require('./routes/chat');
 const analyticsRoutes = require('./routes/analytics');
 const uploadRoutes = require('./routes/upload');
 const interactionRoutes = require('./routes/interactions');
+const quizRoutes = require('./routes/quiz');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/interactions', interactionRoutes);
+app.use('/api/quiz', quizRoutes);
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/reactions', require('./routes/reactions'));
 

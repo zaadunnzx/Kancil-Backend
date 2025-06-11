@@ -1,7 +1,15 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/database');
-const { User, Course, SubCourse } = require('../models');
+const { 
+  User, 
+  Course, 
+  SubCourse, 
+  StudentEnrollment,
+  QuizBank,
+  QuizSettings,
+  StudentSubCourseProgress
+} = require('../models');
 
 const seedData = async () => {
   try {
@@ -150,6 +158,248 @@ const seedData = async () => {
     }
 
     console.log('SubCourses created successfully');
+
+    // Enroll students in courses
+    console.log('Creating student enrollments...');
+    for (const student of students) {
+      await StudentEnrollment.findOrCreate({
+        where: {
+          student_id: student.id_user,
+          course_id: mathCourse[0].id
+        },
+        defaults: {
+          student_id: student.id_user,
+          course_id: mathCourse[0].id,
+          enrolled_at: new Date()
+        }
+      });
+
+      await StudentEnrollment.findOrCreate({
+        where: {
+          student_id: student.id_user,
+          course_id: ipaCourse[0].id
+        },
+        defaults: {
+          student_id: student.id_user,
+          course_id: ipaCourse[0].id,
+          enrolled_at: new Date()
+        }
+      });
+    }
+    console.log('Student enrollments created successfully');
+
+    // Find quiz subcourses and create quiz settings & questions
+    console.log('Setting up quiz system...');
+    
+    const quizSubCourses = await SubCourse.findAll({
+      where: { content_type: 'quiz' }
+    });
+
+    for (const quizSubCourse of quizSubCourses) {
+      // Create quiz settings
+      await QuizSettings.findOrCreate({
+        where: { subcourse_id: quizSubCourse.id },
+        defaults: {
+          subcourse_id: quizSubCourse.id,
+          total_questions_in_pool: 30,
+          questions_per_attempt: 10,
+          time_limit_minutes: 60,
+          max_attempts: null,
+          shuffle_questions: true,
+          shuffle_options: true,
+          show_results_immediately: true
+        }
+      });
+
+      // Create 30 sample quiz questions (mix of difficulties)
+      const sampleQuestions = [
+        // Easy questions (12 questions)
+        {
+          question_text: "Berapa hasil dari 2 + 3?",
+          option_a: "4", option_b: "5", option_c: "6", option_d: "7",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 1 + 1?",
+          option_a: "1", option_b: "2", option_c: "3", option_d: "4",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Angka mana yang paling kecil?",
+          option_a: "5", option_b: "3", option_c: "1", option_d: "4",
+          correct_answer: "C", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 4 + 1?",
+          option_a: "5", option_b: "6", option_c: "4", option_d: "3",
+          correct_answer: "A", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 3 + 2?",
+          option_a: "4", option_b: "5", option_c: "6", option_d: "7",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Angka mana yang paling besar?",
+          option_a: "3", option_b: "7", option_c: "5", option_d: "2",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 5 - 2?",
+          option_a: "2", option_b: "3", option_c: "4", option_d: "5",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 6 + 1?",
+          option_a: "6", option_b: "7", option_c: "8", option_d: "9",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 0 + 5?",
+          option_a: "0", option_b: "5", option_c: "10", option_d: "15",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 4 - 1?",
+          option_a: "2", option_b: "3", option_c: "4", option_d: "5",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 7 + 2?",
+          option_a: "8", option_b: "9", option_c: "10", option_d: "11",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 8 - 3?",
+          option_a: "4", option_b: "5", option_c: "6", option_d: "7",
+          correct_answer: "B", difficulty_level: "easy", points: 10
+        },
+        
+        // Medium questions (12 questions)
+        {
+          question_text: "Berapa hasil dari 5 × 3?",
+          option_a: "15", option_b: "8", option_c: "12", option_d: "20",
+          correct_answer: "A", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 4 × 4?",
+          option_a: "12", option_b: "16", option_c: "20", option_d: "8",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 12 ÷ 3?",
+          option_a: "3", option_b: "4", option_c: "5", option_d: "6",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 6 × 2?",
+          option_a: "10", option_b: "12", option_c: "14", option_d: "8",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 15 ÷ 5?",
+          option_a: "2", option_b: "3", option_c: "4", option_d: "5",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 7 × 2?",
+          option_a: "12", option_b: "14", option_c: "16", option_d: "18",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 20 ÷ 4?",
+          option_a: "4", option_b: "5", option_c: "6", option_d: "7",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 3 × 5?",
+          option_a: "12", option_b: "15", option_c: "18", option_d: "20",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 18 ÷ 6?",
+          option_a: "2", option_b: "3", option_c: "4", option_d: "5",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 8 × 2?",
+          option_a: "14", option_b: "16", option_c: "18", option_d: "20",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 24 ÷ 8?",
+          option_a: "2", option_b: "3", option_c: "4", option_d: "5",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 9 × 3?",
+          option_a: "24", option_b: "27", option_c: "30", option_d: "33",
+          correct_answer: "B", difficulty_level: "medium", points: 10
+        },
+
+        // Hard questions (6 questions)
+        {
+          question_text: "Berapa hasil dari (3 + 4) × 2?",
+          option_a: "10", option_b: "14", option_c: "18", option_d: "22",
+          correct_answer: "B", difficulty_level: "hard", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 15 + 8 - 5?",
+          option_a: "16", option_b: "18", option_c: "20", option_d: "22",
+          correct_answer: "B", difficulty_level: "hard", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 6 × 3 - 8?",
+          option_a: "8", option_b: "10", option_c: "12", option_d: "14",
+          correct_answer: "B", difficulty_level: "hard", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 20 ÷ 4 + 7?",
+          option_a: "10", option_b: "12", option_c: "14", option_d: "16",
+          correct_answer: "B", difficulty_level: "hard", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari (5 × 2) + (3 × 3)?",
+          option_a: "17", option_b: "19", option_c: "21", option_d: "23",
+          correct_answer: "B", difficulty_level: "hard", points: 10
+        },
+        {
+          question_text: "Berapa hasil dari 25 - (3 × 4)?",
+          option_a: "11", option_b: "13", option_c: "15", option_d: "17",
+          correct_answer: "B", difficulty_level: "hard", points: 10
+        }
+      ];
+
+      // Create each question
+      for (const questionData of sampleQuestions) {
+        await QuizBank.findOrCreate({
+          where: {
+            subcourse_id: quizSubCourse.id,
+            question_text: questionData.question_text
+          },
+          defaults: {
+            subcourse_id: quizSubCourse.id,
+            ...questionData
+          }
+        });
+      }
+
+      console.log(`✅ Created quiz settings and 30 questions for: ${quizSubCourse.title}`);
+    }
+
+    console.log('Quiz system setup completed successfully!');
+    console.log('\n=== SAMPLE LOGIN CREDENTIALS ===');
+    console.log('Teacher:');
+    console.log('Email: teacher@kancil.com');
+    console.log('Password: teacher123');
+    console.log('\nStudents:');
+    console.log('Email: student1@kancil.com, Password: student123');
+    console.log('Email: student2@kancil.com, Password: student123');
+    console.log('Email: student3@kancil.com, Password: student123');
+    console.log('\nCourse Codes:');
+    console.log('Math: MATH01');
+    console.log('IPA: IPA01');
+    console.log('===============================');    console.log('Quiz system setup completed successfully!');
     console.log('\n=== SAMPLE LOGIN CREDENTIALS ===');
     console.log('Teacher:');
     console.log('Email: teacher@kancil.com');

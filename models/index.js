@@ -10,6 +10,13 @@ const ChatbotInteraction = require('./ChatbotInteraction');
 const Comment = require('./Comment');
 const Reaction = require('./Reaction');
 
+// Import new quiz models
+const QuizBank = require('./QuizBank');
+const QuizSession = require('./QuizSession');
+const QuizAnswer = require('./QuizAnswer');
+const QuizResult = require('./QuizResult');
+const QuizSettings = require('./QuizSettings');
+
 // Define associations
 // User associations
 User.hasMany(Course, { foreignKey: 'teacher_id', as: 'teacherCourses' });
@@ -39,6 +46,14 @@ SubCourse.hasMany(ChatbotInteraction, { foreignKey: 'sub_course_id', as: 'chatIn
 SubCourse.hasMany(StudentSubCourseProgress, { 
   foreignKey: 'sub_course_id', 
   as: 'progress' 
+});
+SubCourse.hasMany(QuizBank, { 
+  foreignKey: 'subcourse_id', 
+  as: 'quiz_questions' 
+});
+SubCourse.hasOne(QuizSettings, { 
+  foreignKey: 'subcourse_id', 
+  as: 'quiz_settings' 
 });
 
 // Comment associations
@@ -73,6 +88,52 @@ StudentSubCourseProgress.belongsTo(User, {
 ChatbotInteraction.belongsTo(User, { foreignKey: 'student_id', as: 'student' });
 ChatbotInteraction.belongsTo(SubCourse, { foreignKey: 'sub_course_id', as: 'subCourse' });
 
+// Quiz System Associations
+QuizBank.belongsTo(SubCourse, { 
+  foreignKey: 'subcourse_id', 
+  as: 'subcourse' 
+});
+QuizSettings.belongsTo(SubCourse, { 
+  foreignKey: 'subcourse_id', 
+  as: 'subcourse' 
+});
+QuizSession.belongsTo(User, { 
+  foreignKey: 'student_id', 
+  as: 'student' 
+});
+QuizSession.belongsTo(SubCourse, { 
+  foreignKey: 'subcourse_id', 
+  as: 'subcourse' 
+});
+QuizSession.hasMany(QuizAnswer, { 
+  foreignKey: 'session_id', 
+  as: 'answers' 
+});
+QuizSession.hasOne(QuizResult, { 
+  foreignKey: 'session_id', 
+  as: 'result' 
+});
+QuizAnswer.belongsTo(QuizSession, { 
+  foreignKey: 'session_id', 
+  as: 'session' 
+});
+QuizAnswer.belongsTo(QuizBank, { 
+  foreignKey: 'question_id', 
+  as: 'question' 
+});
+QuizResult.belongsTo(QuizSession, { 
+  foreignKey: 'session_id', 
+  as: 'session' 
+});
+QuizResult.belongsTo(User, { 
+  foreignKey: 'student_id', 
+  as: 'student' 
+});
+QuizResult.belongsTo(SubCourse, { 
+  foreignKey: 'subcourse_id', 
+  as: 'subcourse' 
+});
+
 module.exports = {
   User,
   Course,
@@ -81,5 +142,10 @@ module.exports = {
   StudentSubCourseProgress,
   ChatbotInteraction,
   Comment,
-  Reaction
+  Reaction,
+  QuizBank,
+  QuizSession,
+  QuizAnswer,
+  QuizResult,
+  QuizSettings
 };

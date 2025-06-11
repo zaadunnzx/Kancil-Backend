@@ -1866,6 +1866,298 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "New Quiz System",
+			"item": [
+				{
+					"name": "Teacher - Quiz Management",
+					"item": [
+						{
+							"name": "Get Quiz Settings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/settings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Quiz Settings",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"total_questions_in_pool\": 30,\n  \"questions_per_attempt\": 10,\n  \"time_limit_minutes\": 60,\n  \"max_attempts\": null,\n  \"shuffle_questions\": true,\n  \"shuffle_options\": true,\n  \"show_results_immediately\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/settings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Questions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/questions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Question",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_text\": \"Berapa hasil dari 5 x 7?\",\n  \"option_a\": \"30\",\n  \"option_b\": \"35\",\n  \"option_c\": \"40\",\n  \"option_d\": \"45\",\n  \"correct_answer\": \"B\",\n  \"difficulty_level\": \"easy\",\n  \"points\": 10\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/questions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Question",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_text\": \"Berapa hasil dari 5 x 7? (Updated)\",\n  \"option_a\": \"30\",\n  \"option_b\": \"35\",\n  \"option_c\": \"40\",\n  \"option_d\": \"45\",\n  \"correct_answer\": \"B\",\n  \"difficulty_level\": \"medium\",\n  \"points\": 15\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/questions/{{question_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"questions",
+										"{{question_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Question",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/questions/{{question_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"questions",
+										"{{question_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Quiz Results",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/results",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"results"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Student - Quiz Taking",
+					"item": [
+						{
+							"name": "Start Quiz Session",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has session info\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    if (jsonData.session_id) {",
+											"        pm.collectionVariables.set(\"session_id\", jsonData.session_id);",
+											"    }",
+											"    if (jsonData.session_token) {",
+											"        pm.collectionVariables.set(\"session_token\", jsonData.session_token);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/start",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"start"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Submit Answer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_id\": 1,\n  \"selected_answer\": \"B\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/sessions/{{session_id}}/answer",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"answer"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Submit Quiz",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/sessions/{{session_id}}/submit",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"submit"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Quiz History",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/student/history/{{subcourse_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"student",
+										"history",
+										"{{subcourse_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		}
 	],
 	"auth": {
@@ -1895,8 +2187,7 @@
 				]
 			}
 		}
-	],
-	"variable": [
+	],	"variable": [
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:5001/api",
@@ -1924,6 +2215,25 @@
 		},
 		{
 			"key": "comment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "question_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "",
+			"type": "string"
+		},		{
+			"key": "session_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "quiz_result_id",
 			"value": "",
 			"type": "string"
 		}
