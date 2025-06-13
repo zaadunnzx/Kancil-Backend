@@ -61,6 +61,7 @@ app.use('/api/interactions', interactionRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/reactions', require('./routes/reactions'));
+app.use('/api/announcements', require('./routes/announcements'));
 
 // Health check
 app.get('/api/health', (req, res) => {

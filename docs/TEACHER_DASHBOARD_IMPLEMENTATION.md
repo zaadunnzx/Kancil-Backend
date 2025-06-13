@@ -38,6 +38,87 @@ Endpoint untuk statistik umum dashboard guru:
 }
 ```
 
+#### **D. Siswa yang Bergabung Hari Ini**
+- **Endpoint**: `GET /analytics/teacher/students-joined-today`
+- **Fungsi**: Melihat siswa yang join ke course guru hari ini
+- **Response**:
+```json
+{
+  "message": "Students who joined today retrieved successfully",
+  "date": "2024-01-15",
+  "students_joined_today": [
+    {
+      "enrollment_id": 123,
+      "student": {
+        "id": "student-uuid",
+        "nama_lengkap": "Siswa Baru",
+        "email": "siswa@example.com",
+        "kelas": 5,
+        "nama_sekolah": "SD Contoh",
+        "foto_profil_url": "https://example.com/photo.jpg"
+      },
+      "course": {
+        "id": 1,
+        "title": "Matematika Dasar",
+        "subject": "Matematika",
+        "kelas": 5,
+        "course_code": "MATH01"
+      },
+      "joined_at": "2024-01-15T14:30:00.000Z",
+      "time_ago": "2 jam yang lalu"
+    }
+  ],
+  "total_joined_today": 5,
+  "courses_summary": [
+    {
+      "course_id": 1,
+      "course_title": "Matematika Dasar",
+      "course_code": "MATH01",
+      "subject": "Matematika",
+      "kelas": 5,
+      "new_students_today": 3,
+      "students": [...]
+    }
+  ],
+  "teacher_courses_count": 2
+}
+```
+
+#### **E. Siswa Aktif Hari Ini**
+- **Endpoint**: `GET /analytics/teacher/students-active-today`
+- **Fungsi**: Melihat siswa yang aktif belajar di course guru hari ini
+- **Response**:
+```json
+{
+  "message": "Active students today retrieved successfully",
+  "date": "2024-01-15",
+  "active_students_today": [
+    {
+      "student": {
+        "id": "student-uuid",
+        "nama_lengkap": "Siswa Aktif",
+        "email": "siswa@example.com",
+        "kelas": 5,
+        "nama_sekolah": "SD Contoh"
+      },
+      "courses_active": [
+        {
+          "course_id": 1,
+          "course_title": "Matematika Dasar",
+          "course_code": "MATH01",
+          "subject": "Matematika"
+        }
+      ],
+      "total_activities": 5,
+      "last_activity": "2024-01-15T16:45:00.000Z",
+      "time_ago": "15 menit yang lalu"
+    }
+  ],
+  "total_active_today": 8,
+  "total_activities": 25
+}
+```
+
 ---
 
 ### **2. Topik Aktif (Course Management)**
@@ -176,5 +257,165 @@ Endpoint untuk statistik umum dashboard guru:
 ## ⚡ **Ready to Use!**
 
 Semua endpoint sudah siap untuk digunakan dengan authentication teacher dan akan mengembalikan data sesuai dengan gambar dashboard yang diminta.
+
+### **4. Sistem Pengumuman (Announcements)**
+
+#### **A. Create Announcement**
+- **Endpoint**: `POST /announcements`
+- **Fungsi**: Guru buat pengumuman dengan lampiran (PDF/foto/link)
+- **Request**:
+```javascript
+// With file attachment
+FormData:
+- title: "Kuis Matematika Besok!"
+- content: "Jangan lupa, besok ada kuis..."
+- course_id: 1 (optional, null = global announcement)
+- priority: "high" | "medium" | "low"
+- expires_at: "2024-01-20T23:59:59.000Z" (optional)
+- attachment: [File Upload]
+
+// With link attachment
+JSON:
+{
+  "title": "Link Materi Tambahan",
+  "content": "Silakan kunjungi link berikut...",
+  "course_id": 1,
+  "priority": "medium",
+  "attachment_url": "https://example.com/materi"
+}
+```
+
+- **Response**:
+```json
+{
+  "message": "Announcement created successfully",
+  "announcement": {
+    "id": 1,
+    "teacher_id": "teacher-uuid",
+    "course_id": 1,
+    "title": "Kuis Matematika Besok!",
+    "content": "Jangan lupa, besok ada kuis...",
+    "priority": "high",
+    "is_active": true,
+    "attachment_type": "pdf",
+    "attachment_url": "/uploads/announcements/file.pdf",
+    "attachment_filename": "quiz-guide.pdf",
+    "announcement_date": "2024-01-15T10:00:00.000Z",
+    "expires_at": "2024-01-20T23:59:59.000Z",
+    "teacher": {
+      "nama_lengkap": "Pak Budi"
+    },
+    "course": {
+      "title": "Matematika Dasar",
+      "course_code": "MATH01"
+    }
+  }
+}
+```
+
+#### **B. Get All Announcements**
+- **Endpoint**: `GET /announcements`
+- **Fungsi**: List pengumuman dengan filter dan pagination
+- **Query Params**:
+  - `course_id`: Filter by course
+  - `priority`: Filter by priority level
+  - `is_active`: Filter by active status
+  - `page`, `limit`: Pagination
+- **Response**:
+```json
+{
+  "announcements": [
+    {
+      "id": 1,
+      "title": "Kuis Matematika Besok!",
+      "content": "Jangan lupa, besok ada kuis...",
+      "priority": "high",
+      "is_active": true,
+      "attachment_type": "pdf",
+      "attachment_url": "/uploads/announcements/file.pdf",
+      "announcement_date": "2024-01-15T10:00:00.000Z",
+      "teacher": {
+        "nama_lengkap": "Pak Budi"
+      },
+      "course": {
+        "title": "Matematika Dasar"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 3
+  }
+}
+```
+
+#### **C. Update Announcement**
+- **Endpoint**: `PUT /announcements/:id`
+- **Fungsi**: Edit pengumuman, ganti lampiran, atau hapus lampiran
+- **Features**:
+  - Update text content
+  - Replace file attachment
+  - Change to link attachment
+  - Remove attachment (`remove_attachment: "true"`)
+  - Update priority/expiry
+
+#### **D. Delete Announcement**
+- **Endpoint**: `DELETE /announcements/:id`
+- **Fungsi**: Hapus pengumuman dan file lampiran
+- **Security**: Only announcement owner can delete
+
+#### **E. Toggle Active Status**
+- **Endpoint**: `PATCH /announcements/:id/toggle-active`
+- **Fungsi**: Aktifkan/nonaktifkan pengumuman tanpa menghapus
+- **Response**:
+```json
+{
+  "message": "Announcement activated successfully",
+  "announcement": {
+    "id": 1,
+    "is_active": true
+  }
+}
+```
+
+#### **F. Course Announcements**
+- **Endpoint**: `GET /announcements/course/:courseId`
+- **Fungsi**: Pengumuman khusus untuk halaman course
+- **Features**:
+  - Limited results (recent announcements)
+  - Only active announcements
+  - Auto-filter expired announcements
+
+### **5. Fitur Lampiran Pengumuman**
+
+#### **A. Supported Attachment Types**
+1. **File Upload** (`pdf`, `image`):
+   - PDF documents (max 10MB)
+   - Images: JPEG, PNG, GIF, WebP (max 10MB)
+   - Auto file type detection
+   - Unique filename generation
+   - Secure file storage
+
+2. **Link Attachment** (`link`):
+   - External URLs
+   - Google Classroom links
+   - YouTube videos
+   - Online resources
+
+#### **B. File Management**
+- **Upload Directory**: `/uploads/announcements/`
+- **Filename Format**: `announcement-{timestamp}-{random}.{ext}`
+- **Security**: File type validation, size limits
+- **Auto Cleanup**: Files deleted when announcement is deleted
+
+#### **C. Permission System**
+- **Teachers**: Can create, update, delete own announcements
+- **Students**: Can view announcements for enrolled courses + global announcements
+- **Course Filter**: Students only see relevant announcements
+- **Expiry Filter**: Auto-hide expired announcements
+
+---
 
 **Import collection Postman dan test dengan login sebagai teacher!** 🎉

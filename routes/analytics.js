@@ -1085,4 +1085,498 @@ router.get('/teacher/average-quiz-score', authenticate, async (req, res, next) =
   }
 });
 
+// Get students who joined teacher's courses today
+router.get('/teacher/students-joined-today', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const teacherId = req.user.id_user;
+    
+    // Get start and end of today
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    
+    console.log('Date range:', { startOfDay, endOfDay }); // Debug log
+    
+    // Find all courses by this teacher
+    const teacherCourses = await Course.findAll({
+      where: { teacher_id: teacherId },
+      attributes: ['id', 'title', 'subject', 'kelas', 'course_code']
+    });
+    
+    const courseIds = teacherCourses.map(course => course.id);
+    
+    if (courseIds.length === 0) {
+      return res.json({
+        message: 'No courses found for this teacher',
+        students_joined_today: [],
+        total_joined_today: 0,
+        courses_count: 0
+      });
+    }
+    
+    // Find enrollments that happened today in teacher's courses
+    const todayEnrollments = await StudentEnrollment.findAll({
+      where: {
+        course_id: courseIds,
+        enrolled_at: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      },
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id_user', 'nama_lengkap', 'email', 'kelas', 'nama_sekolah', 'foto_profil_url']
+        },
+        {
+          model: Course,
+          as: 'course',
+          attributes: ['id', 'title', 'subject', 'kelas', 'course_code']
+        }
+      ],
+      order: [['enrolled_at', 'DESC']]
+    });
+    
+    // Format the response data
+    const studentsJoinedToday = todayEnrollments.map(enrollment => ({
+      enrollment_id: enrollment.id,
+      student: {
+        id: enrollment.student.id_user,
+        nama_lengkap: enrollment.student.nama_lengkap,
+        email: enrollment.student.email,
+        kelas: enrollment.student.kelas,
+        nama_sekolah: enrollment.student.nama_sekolah,
+        foto_profil_url: enrollment.student.foto_profil_url
+      },
+      course: {
+        id: enrollment.course.id,
+        title: enrollment.course.title,
+        subject: enrollment.course.subject,
+        kelas: enrollment.course.kelas,
+        course_code: enrollment.course.course_code
+      },
+      joined_at: enrollment.enrolled_at,
+      time_ago: getTimeAgo(enrollment.enrolled_at)
+    }));
+    
+    // Group by course for summary
+    const coursesSummary = {};
+    todayEnrollments.forEach(enrollment => {
+      const courseId = enrollment.course.id;
+      if (!coursesSummary[courseId]) {
+        coursesSummary[courseId] = {
+          course_id: courseId,
+          course_title: enrollment.course.title,
+          course_code: enrollment.course.course_code,
+          subject: enrollment.course.subject,
+          kelas: enrollment.course.kelas,
+          new_students_today: 0,
+          students: []
+        };
+      }
+      coursesSummary[courseId].new_students_today++;
+      coursesSummary[courseId].students.push({
+        nama_lengkap: enrollment.student.nama_lengkap,
+        joined_at: enrollment.enrolled_at
+      });
+    });
+    
+    res.json({
+      message: 'Students who joined today retrieved successfully',
+      date: today.toISOString().split('T')[0],
+      students_joined_today: studentsJoinedToday,
+      total_joined_today: todayEnrollments.length,
+      courses_summary: Object.values(coursesSummary),
+      teacher_courses_count: courseIds.length,
+      debug_info: {
+        teacher_id: teacherId,
+        course_ids: courseIds,
+        date_range: {
+          start: startOfDay.toISOString(),
+          end: endOfDay.toISOString()
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error in students-joined-today:', error);
+    next(error);
+  }
+});
+
+// Get students who were active today in teacher's courses
+router.get('/teacher/students-active-today', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const teacherId = req.user.id_user;
+    
+    // Get start and end of today
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    
+    // Find all courses by this teacher
+    const teacherCourses = await Course.findAll({
+      where: { teacher_id: teacherId },
+      attributes: ['id', 'title', 'subject', 'kelas', 'course_code']
+    });
+    
+    const courseIds = teacherCourses.map(course => course.id);
+    
+    if (courseIds.length === 0) {
+      return res.json({
+        message: 'No courses found for this teacher',
+        active_students_today: [],
+        total_active_today: 0
+      });
+    }
+    
+    // Find student progress activities that happened today
+    const todayActivities = await StudentSubCourseProgress.findAll({
+      where: {
+        enrollment_course_id: courseIds,
+        last_accessed_at: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      },
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id_user', 'nama_lengkap', 'email', 'kelas', 'nama_sekolah']
+        },
+        {
+          model: SubCourse,
+          as: 'subcourse',
+          attributes: ['id', 'title', 'content_type'],
+          include: [{
+            model: Course,
+            as: 'course',
+            attributes: ['id', 'title', 'subject', 'course_code']
+          }]
+        }
+      ],
+      order: [['last_accessed_at', 'DESC']]
+    });
+    
+    // Group by student to avoid duplicates
+    const activeStudentsMap = {};
+    todayActivities.forEach(activity => {
+      const studentId = activity.student.id_user;
+      if (!activeStudentsMap[studentId]) {
+        activeStudentsMap[studentId] = {
+          student: activity.student,
+          courses_active: [],
+          total_activities: 0,
+          last_activity: activity.last_accessed_at
+        };
+      }
+      
+      activeStudentsMap[studentId].total_activities++;
+      if (activity.last_accessed_at > activeStudentsMap[studentId].last_activity) {
+        activeStudentsMap[studentId].last_activity = activity.last_accessed_at;
+      }
+      
+      // Add course to active courses if not already added
+      const courseExists = activeStudentsMap[studentId].courses_active.find(
+        c => c.course_id === activity.subcourse.course.id
+      );
+      if (!courseExists) {
+        activeStudentsMap[studentId].courses_active.push({
+          course_id: activity.subcourse.course.id,
+          course_title: activity.subcourse.course.title,
+          course_code: activity.subcourse.course.course_code,
+          subject: activity.subcourse.course.subject
+        });
+      }
+    });
+    
+    const activeStudentsToday = Object.values(activeStudentsMap).map(item => ({
+      student: {
+        id: item.student.id_user,
+        nama_lengkap: item.student.nama_lengkap,
+        email: item.student.email,
+        kelas: item.student.kelas,
+        nama_sekolah: item.student.nama_sekolah
+      },
+      courses_active: item.courses_active,
+      total_activities: item.total_activities,
+      last_activity: item.last_activity,
+      time_ago: getTimeAgo(item.last_activity)
+    }));
+    
+    res.json({
+      message: 'Active students today retrieved successfully',
+      date: today.toISOString().split('T')[0],
+      active_students_today: activeStudentsToday,
+      total_active_today: activeStudentsToday.length,
+      total_activities: todayActivities.length
+    });
+  } catch (error) {
+    console.error('Error in students-active-today:', error);
+    next(error);
+  }
+});
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInMs = now - new Date(date);
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  
+  if (diffInHours > 0) {
+    return `${diffInHours} jam yang lalu`;
+  } else if (diffInMinutes > 0) {
+    return `${diffInMinutes} menit yang lalu`;
+  } else {
+    return 'Baru saja';
+  }
+}
+
+// Get students who joined teacher's courses today
+router.get('/teacher/students-joined-today', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const teacherId = req.user.id_user;
+    
+    // Get start and end of today
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    
+    console.log('Date range:', { startOfDay, endOfDay }); // Debug log
+    
+    // Find all courses by this teacher
+    const teacherCourses = await Course.findAll({
+      where: { teacher_id: teacherId },
+      attributes: ['id', 'title', 'subject', 'kelas', 'course_code']
+    });
+    
+    const courseIds = teacherCourses.map(course => course.id);
+    
+    if (courseIds.length === 0) {
+      return res.json({
+        message: 'No courses found for this teacher',
+        students_joined_today: [],
+        total_joined_today: 0,
+        courses_count: 0
+      });
+    }
+    
+    // Find enrollments that happened today in teacher's courses
+    const todayEnrollments = await StudentEnrollment.findAll({
+      where: {
+        course_id: courseIds,
+        enrolled_at: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      },
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id_user', 'nama_lengkap', 'email', 'kelas', 'nama_sekolah', 'foto_profil_url']
+        },
+        {
+          model: Course,
+          as: 'course',
+          attributes: ['id', 'title', 'subject', 'kelas', 'course_code']
+        }
+      ],
+      order: [['enrolled_at', 'DESC']]
+    });
+    
+    // Format the response data
+    const studentsJoinedToday = todayEnrollments.map(enrollment => ({
+      enrollment_id: enrollment.id,
+      student: {
+        id: enrollment.student.id_user,
+        nama_lengkap: enrollment.student.nama_lengkap,
+        email: enrollment.student.email,
+        kelas: enrollment.student.kelas,
+        nama_sekolah: enrollment.student.nama_sekolah,
+        foto_profil_url: enrollment.student.foto_profil_url
+      },
+      course: {
+        id: enrollment.course.id,
+        title: enrollment.course.title,
+        subject: enrollment.course.subject,
+        kelas: enrollment.course.kelas,
+        course_code: enrollment.course.course_code
+      },
+      joined_at: enrollment.enrolled_at,
+      time_ago: getTimeAgo(enrollment.enrolled_at)
+    }));
+    
+    // Group by course for summary
+    const coursesSummary = {};
+    todayEnrollments.forEach(enrollment => {
+      const courseId = enrollment.course.id;
+      if (!coursesSummary[courseId]) {
+        coursesSummary[courseId] = {
+          course_id: courseId,
+          course_title: enrollment.course.title,
+          course_code: enrollment.course.course_code,
+          subject: enrollment.course.subject,
+          kelas: enrollment.course.kelas,
+          new_students_today: 0,
+          students: []
+        };
+      }
+      coursesSummary[courseId].new_students_today++;
+      coursesSummary[courseId].students.push({
+        nama_lengkap: enrollment.student.nama_lengkap,
+        joined_at: enrollment.enrolled_at
+      });
+    });
+    
+    res.json({
+      message: 'Students who joined today retrieved successfully',
+      date: today.toISOString().split('T')[0],
+      students_joined_today: studentsJoinedToday,
+      total_joined_today: todayEnrollments.length,
+      courses_summary: Object.values(coursesSummary),
+      teacher_courses_count: courseIds.length,
+      debug_info: {
+        teacher_id: teacherId,
+        course_ids: courseIds,
+        date_range: {
+          start: startOfDay.toISOString(),
+          end: endOfDay.toISOString()
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error in students-joined-today:', error);
+    next(error);
+  }
+});
+
+// Get students who were active today in teacher's courses
+router.get('/teacher/students-active-today', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    const teacherId = req.user.id_user;
+    
+    // Get start and end of today
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    
+    // Find all courses by this teacher
+    const teacherCourses = await Course.findAll({
+      where: { teacher_id: teacherId },
+      attributes: ['id', 'title', 'subject', 'kelas', 'course_code']
+    });
+    
+    const courseIds = teacherCourses.map(course => course.id);
+    
+    if (courseIds.length === 0) {
+      return res.json({
+        message: 'No courses found for this teacher',
+        active_students_today: [],
+        total_active_today: 0
+      });
+    }
+    
+    // Find student progress activities that happened today
+    const todayActivities = await StudentSubCourseProgress.findAll({
+      where: {
+        enrollment_course_id: courseIds,
+        last_accessed_at: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      },
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id_user', 'nama_lengkap', 'email', 'kelas', 'nama_sekolah']
+        },
+        {
+          model: SubCourse,
+          as: 'subcourse',
+          attributes: ['id', 'title', 'content_type'],
+          include: [{
+            model: Course,
+            as: 'course',
+            attributes: ['id', 'title', 'subject', 'course_code']
+          }]
+        }
+      ],
+      order: [['last_accessed_at', 'DESC']]
+    });
+    
+    // Group by student to avoid duplicates
+    const activeStudentsMap = {};
+    todayActivities.forEach(activity => {
+      const studentId = activity.student.id_user;
+      if (!activeStudentsMap[studentId]) {
+        activeStudentsMap[studentId] = {
+          student: activity.student,
+          courses_active: [],
+          total_activities: 0,
+          last_activity: activity.last_accessed_at
+        };
+      }
+      
+      activeStudentsMap[studentId].total_activities++;
+      if (activity.last_accessed_at > activeStudentsMap[studentId].last_activity) {
+        activeStudentsMap[studentId].last_activity = activity.last_accessed_at;
+      }
+      
+      // Add course to active courses if not already added
+      const courseExists = activeStudentsMap[studentId].courses_active.find(
+        c => c.course_id === activity.subcourse.course.id
+      );
+      if (!courseExists) {
+        activeStudentsMap[studentId].courses_active.push({
+          course_id: activity.subcourse.course.id,
+          course_title: activity.subcourse.course.title,
+          course_code: activity.subcourse.course.course_code,
+          subject: activity.subcourse.course.subject
+        });
+      }
+    });
+    
+    const activeStudentsToday = Object.values(activeStudentsMap).map(item => ({
+      student: {
+        id: item.student.id_user,
+        nama_lengkap: item.student.nama_lengkap,
+        email: item.student.email,
+        kelas: item.student.kelas,
+        nama_sekolah: item.student.nama_sekolah
+      },
+      courses_active: item.courses_active,
+      total_activities: item.total_activities,
+      last_activity: item.last_activity,
+      time_ago: getTimeAgo(item.last_activity)
+    }));
+    
+    res.json({
+      message: 'Active students today retrieved successfully',
+      date: today.toISOString().split('T')[0],
+      active_students_today: activeStudentsToday,
+      total_active_today: activeStudentsToday.length,
+      total_activities: todayActivities.length
+    });
+  } catch (error) {
+    console.error('Error in students-active-today:', error);
+    next(error);
+  }
+});
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInMs = now - new Date(date);
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  
+  if (diffInHours > 0) {
+    return `${diffInHours} jam yang lalu`;
+  } else if (diffInMinutes > 0) {
+    return `${diffInMinutes} menit yang lalu`;
+  } else {
+    return 'Baru saja';
+  }
+}
+
 module.exports = router;

@@ -12,7 +12,6 @@ const Reaction = require('./Reaction');
 
 // Import announcement model
 const Announcement = require('./Announcement');
-const AnnouncementAttachment = require('./AnnouncementAttachment');
 
 // Import quiz models
 const QuizBank = require('./QuizBank');
@@ -27,6 +26,7 @@ User.hasMany(Course, { foreignKey: 'teacher_id', as: 'teacherCourses' });
 User.hasMany(Comment, { foreignKey: 'id_user', as: 'comments' });
 User.hasMany(Reaction, { foreignKey: 'id_user', as: 'reactions' });
 User.hasMany(StudentEnrollment, { foreignKey: 'student_id', as: 'enrollments' });
+User.hasMany(Announcement, { foreignKey: 'teacher_id', as: 'announcements' });
 
 // Course associations
 Course.belongsTo(User, { foreignKey: 'teacher_id', as: 'teacher' });
@@ -37,6 +37,10 @@ Course.hasMany(SubCourse, {
 Course.hasMany(StudentEnrollment, { 
   foreignKey: 'course_id', 
   as: 'enrollments' 
+});
+Course.hasMany(Announcement, { 
+  foreignKey: 'course_id', 
+  as: 'announcements' 
 });
 
 // SubCourse associations
@@ -95,16 +99,6 @@ ChatbotInteraction.belongsTo(SubCourse, { foreignKey: 'sub_course_id', as: 'subC
 // Announcement associations
 Announcement.belongsTo(User, { foreignKey: 'teacher_id', as: 'teacher' });
 Announcement.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
-Announcement.hasMany(AnnouncementAttachment, { 
-  foreignKey: 'announcement_id', 
-  as: 'attachments' 
-});
-
-// AnnouncementAttachment associations
-AnnouncementAttachment.belongsTo(Announcement, { 
-  foreignKey: 'announcement_id', 
-  as: 'announcement' 
-});
 
 // Quiz System Associations
 QuizBank.belongsTo(SubCourse, { 
@@ -162,7 +156,6 @@ module.exports = {
   Comment,
   Reaction,
   Announcement,
-  AnnouncementAttachment,
   QuizBank,
   QuizSession,
   QuizAnswer,

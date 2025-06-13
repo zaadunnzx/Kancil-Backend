@@ -609,7 +609,385 @@ curl -X GET http://localhost:5001/api/analytics/student/dashboard \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-## 📁 6. File Upload Endpoints
+### 5.4 Students Who Joined Today (Teacher only)
+
+**Postman:**
+```
+GET {{baseUrl}}/analytics/teacher/students-joined-today
+Authorization: Bearer {{token}}
+```
+
+**curl:**
+```bash
+curl -X GET http://localhost:5001/api/analytics/teacher/students-joined-today \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Expected Response:**
+```json
+{
+  "message": "Students who joined today retrieved successfully",
+  "date": "2024-01-15",
+  "students_joined_today": [
+    {
+      "enrollment_id": 123,
+      "student": {
+        "id": "student-uuid",
+        "nama_lengkap": "Siswa Baru",
+        "email": "siswa@example.com",
+        "kelas": 5,
+        "nama_sekolah": "SD Contoh",
+        "foto_profil_url": "https://example.com/photo.jpg"
+      },
+      "course": {
+        "id": 1,
+        "title": "Matematika Dasar",
+        "subject": "Matematika",
+        "kelas": 5,
+        "course_code": "MATH01"
+      },
+      "joined_at": "2024-01-15T14:30:00.000Z",
+      "time_ago": "2 jam yang lalu"
+    }
+  ],
+  "total_joined_today": 5,
+  "courses_summary": [
+    {
+      "course_id": 1,
+      "course_title": "Matematika Dasar",
+      "course_code": "MATH01",
+      "subject": "Matematika",
+      "kelas": 5,
+      "new_students_today": 3,
+      "students": [...]
+    }
+  ],
+  "teacher_courses_count": 2
+}
+```
+
+### 5.5 Active Students Today (Teacher only)
+
+**Postman:**
+```
+GET {{baseUrl}}/analytics/teacher/students-active-today
+Authorization: Bearer {{token}}
+```
+
+**curl:**
+```bash
+curl -X GET http://localhost:5001/api/analytics/teacher/students-active-today \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Expected Response:**
+```json
+{
+  "message": "Active students today retrieved successfully",
+  "date": "2024-01-15",
+  "active_students_today": [
+    {
+      "student": {
+        "id": "student-uuid",
+        "nama_lengkap": "Siswa Aktif",
+        "email": "siswa@example.com",
+        "kelas": 5,
+        "nama_sekolah": "SD Contoh"
+      },
+      "courses_active": [
+        {
+          "course_id": 1,
+          "course_title": "Matematika Dasar",
+          "course_code": "MATH01",
+          "subject": "Matematika"
+        }
+      ],
+      "total_activities": 5,
+      "last_activity": "2024-01-15T16:45:00.000Z",
+      "time_ago": "15 menit yang lalu"
+    }
+  ],
+  "total_active_today": 8,
+  "total_activities": 25
+}
+```
+
+## 📢 7. Announcements Endpoints
+
+### 7.1 Create Announcement (Teacher only)
+
+**With File Attachments (Multiple files):**
+```
+POST {{baseUrl}}/announcements
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+Body (form-data):
+title: Ujian Tengah Semester
+content: Ujian akan dilaksanakan pada tanggal 25 Januari 2024. Silakan persiapkan diri dengan baik.
+course_id: 1
+priority: high
+status: draft
+expires_at: 2024-01-25T23:59:59.000Z
+attachments: [file1.pdf, image1.jpg] (multiple files allowed)
+links: [{"url":"https://meet.google.com/abc","title":"Google Meet Room"}]
+```
+
+**With Link Only:**
+```
+POST {{baseUrl}}/announcements
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+Body (form-data):
+title: Link Materi Tambahan
+content: Silakan kunjungi link berikut untuk materi tambahan
+course_id: 1
+priority: medium
+status: draft
+links: [{"url":"https://example.com/materi","title":"Materi Pembelajaran"}]
+```
+
+**Global Announcement (All Students):**
+```
+POST {{baseUrl}}/announcements
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+Body (form-data):
+title: Pengumuman Libur Sekolah
+content: Sekolah akan libur tanggal 17 Agustus 2024
+priority: low
+status: published
+```
+
+**curl example:**
+```bash
+curl -X POST http://localhost:5001/api/announcements \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "title=Ujian Tengah Semester" \
+  -F "content=Ujian akan dilaksanakan pada tanggal 25 Januari 2024" \
+  -F "course_id=1" \
+  -F "priority=high" \
+  -F "status=draft" \
+  -F "attachments=@jadwal_ujian.pdf" \
+  -F 'links=[{"url":"https://meet.google.com/abc","title":"Google Meet"}]'
+```
+
+**Expected Response:**
+```json
+{
+  "message": "Announcement created successfully",
+  "announcement": {
+    "id": 1,
+    "teacher_id": "teacher-uuid",
+    "course_id": 1,
+    "title": "Ujian Tengah Semester",
+    "content": "Ujian akan dilaksanakan pada tanggal 25 Januari 2024",
+    "priority": "high",
+    "status": "draft",
+    "announcement_date": "2024-01-15T10:00:00.000Z",
+    "expires_at": "2024-01-25T23:59:59.000Z",
+    "teacher": {
+      "id_user": "teacher-uuid",
+      "nama_lengkap": "Pak Budi",
+      "email": "teacher@example.com"
+    },
+    "course": {
+      "id": 1,
+      "title": "Matematika Dasar",
+      "subject": "Matematika",
+      "course_code": "MATH01"
+    },
+    "attachments": [
+      {
+        "id": 1,
+        "attachment_type": "file",
+        "file_name": "jadwal_ujian.pdf",
+        "file_url": "/uploads/announcements/announcement-123456.pdf",
+        "file_size": 245760,
+        "mime_type": "application/pdf"
+      },
+      {
+        "id": 2,
+        "attachment_type": "link",
+        "link_url": "https://meet.google.com/abc",
+        "link_title": "Google Meet"
+      }
+    ]
+  }
+}
+```
+
+### 7.2 Get All Announcements
+
+**For Students (see only enrolled courses + global):**
+```
+GET {{baseUrl}}/announcements
+Authorization: Bearer {{token}}
+
+Query Params (optional):
+- course_id: 1
+- priority: high
+- page: 1
+- limit: 10
+```
+
+**For Teachers (see only own announcements):**
+```
+GET {{baseUrl}}/announcements
+Authorization: Bearer {{token}}
+
+Query Params (optional):
+- course_id: 1
+- priority: medium
+- is_active: true
+```
+
+**curl:**
+```bash
+curl -X GET "http://localhost:5001/api/announcements?course_id=1&priority=high" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+**Expected Response:**
+```json
+{
+  "announcements": [
+    {
+      "id": 1,
+      "title": "Kuis Matematika Besok!",
+      "content": "Jangan lupa, besok ada kuis...",
+      "priority": "high",
+      "is_active": true,
+      "attachment_type": "pdf",
+      "attachment_url": "/uploads/announcements/file.pdf",
+      "announcement_date": "2024-01-15T10:00:00.000Z",
+      "teacher": {
+        "nama_lengkap": "Pak Budi"
+      },
+      "course": {
+        "title": "Matematika Dasar",
+        "course_code": "MATH01"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 15,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 2
+  }
+}
+```
+
+### 7.3 Get Announcement by ID
+
+**Postman:**
+```
+GET {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+```
+
+**curl:**
+```bash
+curl -X GET http://localhost:5001/api/announcements/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 7.4 Update Announcement (Teacher only)
+
+**Update with new file:**
+```
+PUT {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+Body (form-data):
+title: Updated Title
+content: Updated content
+priority: medium
+attachment: [New File Upload]
+```
+
+**Update with link:**
+```
+PUT {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+Body (raw JSON):
+{
+  "title": "Updated Announcement",
+  "content": "Updated content here",
+  "attachment_url": "https://newlink.com"
+}
+```
+
+**Remove attachment:**
+```
+PUT {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+Body (raw JSON):
+{
+  "title": "Updated without attachment",
+  "remove_attachment": "true"
+}
+```
+
+### 7.5 Delete Announcement (Teacher only)
+
+**Postman:**
+```
+DELETE {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+```
+
+**curl:**
+```bash
+curl -X DELETE http://localhost:5001/api/announcements/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 7.6 Toggle Announcement Active Status
+
+**Postman:**
+```
+PATCH {{baseUrl}}/announcements/{{announcement_id}}/toggle-active
+Authorization: Bearer {{token}}
+```
+
+**Expected Response:**
+```json
+{
+  "message": "Announcement activated successfully",
+  "announcement": {
+    "id": 1,
+    "is_active": true
+  }
+}
+```
+
+### 7.7 Get Course Announcements
+
+**For course page announcements:**
+```
+GET {{baseUrl}}/announcements/course/{{course_id}}
+Authorization: Bearer {{token}}
+
+Query Params:
+- limit: 5 (default)
+```
+
+**curl:**
+```bash
+curl -X GET http://localhost:5001/api/announcements/course/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## 📁 7. File Upload Endpoints
 
 ### 6.1 Upload Single File
 
@@ -971,3 +1349,135 @@ npm run seed
 ```
 
 Semua endpoint sudah siap untuk testing! 🎉
+
+## 🎯 6. Announcement Endpoints
+
+### 6.1 Create Announcement (Teacher only)
+
+**Postman:**
+```
+POST {{baseUrl}}/announcements
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+FormData:
+- title: "Ujian Tengah Semester"
+- content: "Ujian akan dilaksanakan pada tanggal 25 Januari 2024"
+- course_id: 1 (optional)
+- priority: "high"  
+- status: "draft"
+- attachments: [file1.pdf, image1.jpg]
+- links: [{"url":"https://meet.google.com/abc","title":"Google Meet"}]
+```
+
+**curl:**
+```bash
+curl -X POST http://localhost:5001/api/announcements \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "title=Ujian Tengah Semester" \
+  -F "content=Ujian akan dilaksanakan pada tanggal 25 Januari 2024" \
+  -F "course_id=1" \
+  -F "priority=high" \
+  -F "status=draft" \
+  -F "attachments=@jadwal_ujian.pdf" \
+  -F 'links=[{"url":"https://meet.google.com/abc","title":"Google Meet"}]'
+```
+
+### 6.2 Get My Announcements (Teacher only)
+
+**Postman:**
+```
+GET {{baseUrl}}/announcements/my-announcements
+Authorization: Bearer {{token}}
+
+Query Params:
+- page: 1
+- limit: 10
+- status: "published"
+- course_id: 1
+- search: "ujian"
+```
+
+**curl:**
+```bash
+curl -X GET "http://localhost:5001/api/announcements/my-announcements?page=1&limit=10&status=published" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### 6.3 Get Announcements for Students
+
+**Postman:**
+```
+GET {{baseUrl}}/announcements/for-students
+Authorization: Bearer {{token}}
+
+Query Params:
+- page: 1
+- limit: 10
+- course_id: 1
+- priority: "high"
+```
+
+**curl:**
+```bash
+curl -X GET "http://localhost:5001/api/announcements/for-students?page=1&limit=10" \
+  -H "Authorization: Bearer STUDENT_TOKEN"
+```
+
+### 6.4 Update Announcement (Teacher only)
+
+**Postman:**
+```
+PUT {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+FormData:
+- title: "Updated Title"
+- content: "Updated content"
+- priority: "urgent"
+- status: "published"
+- new_attachments: [new_file.pdf]
+- remove_attachment_ids: [1, 2]
+```
+
+**curl:**
+```bash
+curl -X PUT http://localhost:5001/api/announcements/1 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "title=Updated Title" \
+  -F "content=Updated content" \
+  -F "priority=urgent" \
+  -F "status=published"
+```
+
+### 6.5 Publish Announcement (Teacher only)
+
+**Postman:**
+```
+PATCH {{baseUrl}}/announcements/{{announcement_id}}/publish
+Authorization: Bearer {{token}}
+```
+
+### 6.6 Archive Announcement (Teacher only)
+
+**Postman:**
+```
+PATCH {{baseUrl}}/announcements/{{announcement_id}}/archive
+Authorization: Bearer {{token}}
+```
+
+### 6.7 Delete Announcement (Teacher only)
+
+**Postman:**
+```
+DELETE {{baseUrl}}/announcements/{{announcement_id}}
+Authorization: Bearer {{token}}
+```
+
+**Expected Response:**
+```json
+{
+  "message": "Announcement deleted successfully"
+}
+```x

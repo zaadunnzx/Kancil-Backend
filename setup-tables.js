@@ -186,10 +186,162 @@ async function runMigrations() {
       await queryInterface.changeColumn('student_sub_course_progress', 'score', {
         type: Sequelize.DECIMAL(5, 2),
         allowNull: true
-      });
-      console.log('✅ Updated score column to DECIMAL(5,2)');
+      });    console.log('✅ Updated score column to DECIMAL(5,2)');
     } catch (error) {
       console.log('⚠️ Score column already updated, skipping...');
+    }
+
+    console.log('Creating announcements table...');
+    
+    // Create announcements table
+    try {
+      await queryInterface.createTable('announcements', {
+        id: {
+          type: Sequelize.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false
+        },
+        teacher_id: {
+          type: Sequelize.UUID,
+          allowNull: false,
+          references: {
+            model: 'users',
+            key: 'id_user'
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE'
+        },
+        course_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: {
+            model: 'courses',
+            key: 'id'
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL'
+        },
+        title: {
+          type: Sequelize.STRING(255),
+          allowNull: false
+        },
+        content: {
+          type: Sequelize.TEXT,
+          allowNull: false
+        },
+        announcement_date: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        },
+        priority: {
+          type: Sequelize.ENUM('low', 'medium', 'high', 'urgent'),
+          defaultValue: 'medium'
+        },
+        status: {
+          type: Sequelize.ENUM('draft', 'published', 'archived'),
+          defaultValue: 'draft'
+        },
+        expires_at: {
+          type: Sequelize.DATE,
+          allowNull: true
+        },
+        created_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        },
+        updated_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        }
+      });
+      console.log('✅ Created announcements table');
+    } catch (error) {
+      console.log('⚠️ Announcements table already exists, skipping...');
+    }
+
+    // Create announcement_attachments table
+    try {
+      await queryInterface.createTable('announcement_attachments', {
+        id: {
+          type: Sequelize.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false
+        },
+        announcement_id: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'announcements',
+            key: 'id'
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE'
+        },
+        attachment_type: {
+          type: Sequelize.ENUM('file', 'link'),
+          allowNull: false
+        },
+        file_name: {
+          type: Sequelize.STRING(255),
+          allowNull: true
+        },
+        file_path: {
+          type: Sequelize.STRING(500),
+          allowNull: true
+        },
+        file_url: {
+          type: Sequelize.STRING(500),
+          allowNull: true
+        },
+        link_url: {
+          type: Sequelize.STRING(500),
+          allowNull: true
+        },
+        link_title: {
+          type: Sequelize.STRING(255),
+          allowNull: true
+        },
+        file_size: {
+          type: Sequelize.INTEGER,
+          allowNull: true
+        },
+        mime_type: {
+          type: Sequelize.STRING(100),
+          allowNull: true
+        },
+        created_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        }
+      });
+      console.log('✅ Created announcement_attachments table');
+    } catch (error) {
+      console.log('⚠️ Announcement_attachments table already exists, skipping...');
+    }
+
+    // Add indexes for announcements
+    try {
+      await queryInterface.addIndex('announcements', ['teacher_id'], {
+        name: 'idx_announcements_teacher'
+      });
+      await queryInterface.addIndex('announcements', ['course_id'], {
+        name: 'idx_announcements_course'
+      });
+      await queryInterface.addIndex('announcements', ['status'], {
+        name: 'idx_announcements_status'
+      });
+      await queryInterface.addIndex('announcement_attachments', ['announcement_id'], {
+        name: 'idx_attachments_announcement'
+      });
+      console.log('✅ Added announcement indexes');
+    } catch (error) {
+      console.log('⚠️ Announcement indexes already exist, skipping...');
     }
 
     console.log('✅ All migrations completed successfully!');

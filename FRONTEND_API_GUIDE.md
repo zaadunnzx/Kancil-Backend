@@ -1222,6 +1222,482 @@ const StudentDashboard = () => {
 };
 ```
 
+## 📢 Announcements API
+
+### 1. Create Announcement (Teacher)
+
+```javascript
+// services/announcementService.js
+export const createAnnouncement = async (announcementData, attachmentFile) => {
+  try {
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append('title', announcementData.title);
+    formData.append('content', announcementData.content);
+    
+    // Add optional fields
+    if (announcementData.courseId) {
+      formData.append('course_id', announcementData.courseId);
+    }
+    if (announcementData.priority) {
+      formData.append('priority', announcementData.priority);
+    }
+    if (announcementData.expiresAt) {
+      formData.append('expires_at', announcementData.expiresAt);
+    }
+    
+    // Add file attachment if provided
+    if (attachmentFile) {
+      formData.append('attachment', attachmentFile);
+    }
+    // Or add link attachment
+    else if (announcementData.attachmentUrl) {
+      formData.append('attachment_url', announcementData.attachmentUrl);
+    }
+
+    const response = await apiClient.post('/announcements', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Create announcement with link only (no file)
+export const createAnnouncementWithLink = async (announcementData) => {
+  try {
+    const response = await apiClient.post('/announcements', announcementData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Announcement creation form component
+const CreateAnnouncementForm = () => {
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    courseId: '',
+    priority: 'medium',
+    expiresAt: '',
+    attachmentUrl: ''
+  });
+  const [attachmentFile, setAttachmentFile] = useState(null);
+  const [attachmentType, setAttachmentType] = useState('none'); // 'none', 'file', 'link'
+  const [loading, setLoading] = useState(false);
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type and size
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only images (JPEG, PNG, GIF) and PDF files are allowed');
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      setAttachmentFile(file);
+      setAttachmentType('file');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      let result;
+      
+      if (attachmentType === 'file' && attachmentFile) {
+        result = await createAnnouncement(formData, attachmentFile);
+      } else if (attachmentType === 'link' && formData.attachmentUrl) {
+        result = await createAnnouncementWithLink(formData);
+      } else {
+        result = await createAnnouncementWithLink(formData);
+      }
+      
+      console.log('Announcement created:', result);
+      
+      // Reset form
+      setFormData({
+        title: '',
+        content: '',
+        courseId: '',
+        priority: 'medium',
+        expiresAt: '',
+        attachmentUrl: ''
+      });
+      setAttachmentFile(null);
+      setAttachmentType('none');
+      
+      alert('Announcement created successfully!');
+    } catch (error) {
+      console.error('Failed to create announcement:', error);
+      alert('Failed to create announcement: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="announcement-form">
+      <h2>Create Announcement</h2>
+      
+      <input
+        type="text"
+        placeholder="Announcement Title *"
+        value={formData.title}
+        onChange={(e) => setFormData({...formData, title: e.target.value})}
+        required
+      />
+      
+      <textarea
+        placeholder="Announcement Content *"
+        value={formData.content}
+        onChange={(e) => setFormData({...formData, content: e.target.value})}
+        rows={4}
+        required
+      />
+      
+      <select
+        value={formData.courseId}
+        onChange={(e) => setFormData({...formData, courseId: e.target.value})}
+      >
+        <option value="">All Students (Global Announcement)</option>
+        {courses.map(course => (
+          <option key={course.id} value={course.id}>
+            {course.title} ({course.course_code})
+          </option>
+        ))}
+      </select>
+      
+      <select
+        value={formData.priority}
+        onChange={(e) => setFormData({...formData, priority: e.target.value})}
+      >
+        <option value="low">Low Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+      
+      <input
+        type="datetime-local"
+        placeholder="Expires At (Optional)"
+        value={formData.expiresAt}
+        onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
+      />
+      
+      {/* Attachment Type Selector */}
+      <div className="attachment-section">
+        <label>Attachment (Optional):</label>
+        <div className="attachment-type-selector">
+          <label>
+            <input
+              type="radio"
+              value="none"
+              checked={attachmentType === 'none'}
+              onChange={(e) => setAttachmentType(e.target.value)}
+            />
+            No Attachment
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="file"
+              checked={attachmentType === 'file'}
+              onChange={(e) => setAttachmentType(e.target.value)}
+            />
+            Upload File
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="link"
+              checked={attachmentType === 'link'}
+              onChange={(e) => setAttachmentType(e.target.value)}
+            />
+            Add Link
+          </label>
+        </div>
+        
+        {attachmentType === 'file' && (
+          <div className="file-upload">
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleFileSelect}
+            />
+            {attachmentFile && (
+              <p>Selected: {attachmentFile.name}</p>
+            )}
+            <small>Max 10MB. Allowed: Images (JPEG, PNG, GIF) and PDF</small>
+          </div>
+        )}
+        
+        {attachmentType === 'link' && (
+          <input
+            type="url"
+            placeholder="https://example.com/link"
+            value={formData.attachmentUrl}
+            onChange={(e) => setFormData({...formData, attachmentUrl: e.target.value})}
+          />
+        )}
+      </div>
+
+      <button type="submit" disabled={loading}>
+        {loading ? 'Creating...' : 'Create Announcement'}
+      </button>
+    </form>
+  );
+};
+```
+
+### 2. Get Announcements
+
+```javascript
+export const getAnnouncements = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    
+    if (filters.courseId) params.append('course_id', filters.courseId);
+    if (filters.priority) params.append('priority', filters.priority);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.limit) params.append('limit', filters.limit);
+    
+    const response = await apiClient.get(`/announcements?${params}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Get announcements for specific course
+export const getCourseAnnouncements = async (courseId, limit = 5) => {
+  try {
+    const response = await apiClient.get(`/announcements/course/${courseId}?limit=${limit}`);
+    return response.data.announcements;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Announcements list component
+const AnnouncementsList = ({ courseId = null }) => {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState(null);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const data = await getAnnouncements({ 
+          courseId,
+          page: 1,
+          limit: 10 
+        });
+        setAnnouncements(data.announcements);
+        setPagination(data.pagination);
+      } catch (error) {
+        console.error('Failed to fetch announcements:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnnouncements();
+  }, [courseId]);
+
+  const renderAttachment = (announcement) => {
+    if (!announcement.attachment_url) return null;
+
+    switch (announcement.attachment_type) {
+      case 'image':
+        return (
+          <div className="attachment">
+            <img 
+              src={`${API_BASE_URL}${announcement.attachment_url}`} 
+              alt="Attachment"
+              style={{ maxWidth: '200px', maxHeight: '200px' }}
+            />
+          </div>
+        );
+      case 'pdf':
+        return (
+          <div className="attachment">
+            <a 
+              href={`${API_BASE_URL}${announcement.attachment_url}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="pdf-link"
+            >
+              📄 {announcement.attachment_filename}
+            </a>
+          </div>
+        );
+      case 'link':
+        return (
+          <div className="attachment">
+            <a 
+              href={announcement.attachment_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="external-link"
+            >
+              🔗 Open Link
+            </a>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return '#ff4444';
+      case 'medium': return '#ffaa00';
+      case 'low': return '#44aa44';
+      default: return '#666666';
+    }
+  };
+
+  if (loading) return <div>Loading announcements...</div>;
+
+  return (
+    <div className="announcements-list">
+      <h2>Announcements</h2>
+      
+      {announcements.length === 0 ? (
+        <p>No announcements available.</p>
+      ) : (
+        <div className="announcements">
+          {announcements.map(announcement => (
+            <div key={announcement.id} className="announcement-card">
+              <div className="announcement-header">
+                <h3 className="announcement-title">{announcement.title}</h3>
+                <span 
+                  className="priority-badge"
+                  style={{ backgroundColor: getPriorityColor(announcement.priority) }}
+                >
+                  {announcement.priority.toUpperCase()}
+                </span>
+              </div>
+              
+              <div className="announcement-meta">
+                <span>By: {announcement.teacher.nama_lengkap}</span>
+                {announcement.course && (
+                  <span> • Course: {announcement.course.title}</span>
+                )}
+                <span> • {new Date(announcement.announcement_date).toLocaleDateString()}</span>
+              </div>
+              
+              <div className="announcement-content">
+                <p>{announcement.content}</p>
+              </div>
+              
+              {renderAttachment(announcement)}
+              
+              {announcement.expires_at && (
+                <div className="expiry-notice">
+                  Expires: {new Date(announcement.expires_at).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {pagination && pagination.totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            disabled={pagination.page === 1}
+            onClick={() => loadPage(pagination.page - 1)}
+          >
+            Previous
+          </button>
+          <span>Page {pagination.page} of {pagination.totalPages}</span>
+          <button 
+            disabled={pagination.page === pagination.totalPages}
+            onClick={() => loadPage(pagination.page + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### 3. Update Announcement (Teacher)
+
+```javascript
+export const updateAnnouncement = async (announcementId, updateData, attachmentFile) => {
+  try {
+    const formData = new FormData();
+    
+    // Add update fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined && updateData[key] !== null) {
+        formData.append(key, updateData[key]);
+      }
+    });
+    
+    // Add file attachment if provided
+    if (attachmentFile) {
+      formData.append('attachment', attachmentFile);
+    }
+
+    const response = await apiClient.put(`/announcements/${announcementId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+```
+
+### 4. Delete Announcement (Teacher)
+
+```javascript
+export const deleteAnnouncement = async (announcementId) => {
+  try {
+    await apiClient.delete(`/announcements/${announcementId}`);
+    return true;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+```
+
+### 5. Toggle Active Status
+
+```javascript
+export const toggleAnnouncementStatus = async (announcementId) => {
+  try {
+    const response = await apiClient.patch(`/announcements/${announcementId}/toggle-active`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+```
+
 ## 📁 File Upload API
 
 ### 1. Upload Single File
