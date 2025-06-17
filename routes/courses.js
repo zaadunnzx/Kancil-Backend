@@ -1,4 +1,7 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { Course, SubCourse, User, StudentEnrollment, StudentSubCourseProgress } = require('../models');
 const { authenticate, teacherOnly, studentOnly } = require('../middleware/auth');
@@ -6,15 +9,134 @@ const { validateRequest, schemas } = require('../middleware/validation');
 
 const router = express.Router();
 
+// Configure multer for course cover image upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/courses';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `course-cover-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'));
+    }
+  }
+});
+
 // Generate unique course code
 const generateCourseCode = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
 
-// Create course (teachers only)
-router.post('/', authenticate, teacherOnly, validateRequest(schemas.createCourse), async (req, res, next) => {
+// Create course (teachers only) - Support cover image upload
+router.post('/', authenticate, teacherOnly, upload.single('cover_image_url'), async (req, res, next) => {
   try {
+    console.log('Create course request body:', req.body);
+    console.log('Create course file:', req.file);
+
     const { title, subject, kelas, start_date, end_date } = req.body;
+
+    // Validate required fields manually since multer affects validation
+    if (!title || !subject || !kelas) {
+      // Clean up uploaded file if validation fails
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete file:', err);
+        });
+      }
+      return res.status(400).json({ 
+        error: 'Missing required fields: title, subject, kelas' 
+      });
+    }
+
+    // Validate subject
+    if (!['Matematika', 'IPA', 'IPS'].includes(subject)) {
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete file:', err);
+        });
+      }
+      return res.status(400).json({ 
+        error: 'Subject must be one of: Matematika, IPA, IPS' 
+      });
+    }
+
+    // Validate kelas
+    const kelasNumber = parseInt(kelas);
+    if (isNaN(kelasNumber) || kelasNumber < 1 || kelasNumber > 12) {
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete file:', err);
+        });
+      }
+      return res.status(400).json({ 
+        error: 'Kelas must be a number between 1 and 12' 
+      });
+    }
+
+    // Generate cover image URL if file was uploaded
+    let cover_image_url = null;
+    if (req.file) {
+      cover_image_url = `${req.protocol}://${req.get('host')}/uploads/courses/${req.file.filename}`;
+    }
+    
+    let course_code;
+    let isUnique = false;
+    
+    // Generate unique course code
+    while (!isUnique) {
+      course_code = generateCourseCode();
+      const existing = await Course.findOne({ where: { course_code } });
+      if (!existing) isUnique = true;
+    }
+
+    const course = await Course.create({
+      title,
+      subject,
+      kelas: kelasNumber,
+      teacher_id: req.user.id_user,
+      course_code,
+      start_date: start_date || null,
+      end_date: end_date || null,
+      cover_image_url,
+      status: 'draft'
+    });
+
+    res.status(201).json({
+      message: 'Course created successfully',
+      course
+    });
+  } catch (error) {
+    // Clean up uploaded file if any error occurs
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error('Failed to delete file:', err);
+      });
+    }
+    next(error);
+  }
+});
+
+// Create course with JSON data only (no file upload) - Alternative endpoint
+router.post('/create-json', authenticate, teacherOnly, validateRequest(schemas.createCourse), async (req, res, next) => {
+  try {
+    const { title, subject, kelas, start_date, end_date, cover_image_url } = req.body;
     
     let course_code;
     let isUnique = false;
@@ -32,8 +154,9 @@ router.post('/', authenticate, teacherOnly, validateRequest(schemas.createCourse
       kelas,
       teacher_id: req.user.id_user,
       course_code,
-      start_date,
-      end_date,
+      start_date: start_date || null,
+      end_date: end_date || null,
+      cover_image_url: cover_image_url || null,
       status: 'draft'
     });
 

@@ -32,6 +32,8 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Middleware
 app.use(helmet());
 app.use(cors({
