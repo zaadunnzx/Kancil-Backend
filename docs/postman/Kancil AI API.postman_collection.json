@@ -1,0 +1,3264 @@
+{
+	"info": {
+		"_postman_id": "68910d09-6213-4d56-8d06-8060ffa668dc",
+		"name": "Kancil AI API",
+		"description": "Complete and corrected API collection for Kancil AI Backend with all endpoints properly configured",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44349815",
+		"_collection_link": "https://zadun-556757.postman.co/workspace/My-Workspace~32a97efa-c93e-47a0-811e-cbc8fa4e0fca/collection/44349815-68910d09-6213-4d56-8d06-8060ffa668dc?action=share&source=collection_link&creator=44349815"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Student",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nama_lengkap\": \"Test Student 5\",\n  \"email\": \"teststudent5@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"student\",\n  \"kelas\": 5,\n  \"nama_sekolah\": \"SD Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Teacher",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nama_lengkap\": \"Danang Adi\",\n  \"email\": \"pakdanangadi@kancil.com\",\n  \"password\": \"password123\",\n  \"role\": \"teacher\",\n  \"nama_sekolah\": \"SD Nopember\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register with Photo Upload",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama_lengkap",
+									"value": "Student With Photo 1",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "studentphoto2@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password123",
+									"type": "text"
+								},
+								{
+									"key": "role",
+									"value": "student",
+									"type": "text"
+								},
+								{
+									"key": "kelas",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "nama_sekolah",
+									"value": "SD Rembang",
+									"type": "text"
+								},
+								{
+									"key": "foto_profil",
+									"type": "file",
+									"src": "/C:/Users/zaidu/Downloads/121eea4e893d59ff657b5e6549054781.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"token\", jsonData.token);",
+									"        pm.collectionVariables.set(\"user_id\", jsonData.user.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student1@kancil.com\",\n  \"password\": \"student123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login/student",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login",
+								"student"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Login Student 1",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"student1@kancil.com\",\n  \"password\": \"student123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/student",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"student"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Login Student Zadun",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"zaadunnafiek@gmail.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/student",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"student"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Login Student daniel",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"daniel@gmail.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/student",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"student"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Login Teacher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"token\", jsonData.token);",
+									"        pm.collectionVariables.set(\"user_id\", jsonData.user.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"teacher@kancil.com\",\n  \"password\": \"teacher123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login/teacher",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login",
+								"teacher"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Pak Sidiq",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"paksidiq@gmail.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/teacher",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"teacher"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Bu Sari",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"busari@kancil.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/teacher",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"teacher"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Bu Sari Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"busari@kancil.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/teacher",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"teacher"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Bu Dina",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"budina@kancil.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/teacher",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"teacher"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Pak Danang Adi",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"pakdanangadi@kancil.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/teacher",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"teacher"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Google OAuth Student",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google/student",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"google",
+								"student"
+							]
+						},
+						"description": "Open this URL in browser to test Google OAuth for students"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "Get All Courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "subject",
+									"value": "Matematika",
+									"disabled": true
+								},
+								{
+									"key": "kelas",
+									"value": "5",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Courses (Teacher)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses/my-courses?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"my-courses"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Course",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Course created\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.course && jsonData.course.id) {",
+									"        pm.collectionVariables.set(\"course_id\", jsonData.course.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Bilangan Pecahan",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Matematika",
+									"type": "text"
+								},
+								{
+									"key": "kelas",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "start_date",
+									"value": "2024-01-15",
+									"type": "text"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-06-15",
+									"type": "text"
+								},
+								{
+									"key": "cover_image_url",
+									"type": "file",
+									"src": "/C:/Users/zaidu/Downloads/WhatsApp Image 2025-06-15 at 12.21.04_77d0bfbf.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Course",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Bilangan Pecahan\",\n  \"subject\": \"MTK\",\n  \"kelas\": 5,\n  \"start_date\": \"2024-01-15\",\n  \"end_date\": \"2024-06-15\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/courses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Get Course Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses/{{course_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"{{course_id}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Sistem Pernapasan Manusia",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{course_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{course_id}}"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Update Course",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Sistem Peredaran Darah - Updated\",\n  \"start_date\": \"2024-02-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/courses/{{course_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"{{course_id}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Pernapasan Manusia",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Sistem Peredaran Darah - Updated\",\n  \"start_date\": \"2024-02-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/courses/{{course_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"{{course_id}}"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Publish Course",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses/{{course_id}}/publish",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"{{course_id}}",
+								"publish"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Archive Course",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses/{{course_id}}/archive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"{{course_id}}",
+								"archive"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unarchive Course",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/courses/{{course_id}}/unarchive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"{{course_id}}",
+								"unarchive"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Join Course (Student)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"course_code\": \"MATH01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/courses/join",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses",
+								"join"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Join Course Hewan&Tumbuhan",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"course_code\": \"IPA01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/courses/join",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"courses",
+										"join"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "SubCourses",
+			"item": [
+				{
+					"name": "Get SubCourses for Course",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/subcourses/course/{{course_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"subcourses",
+								"course",
+								"{{course_id}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Course Pernapasan Manusia",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/subcourses/course/{{course_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses",
+										"course",
+										"{{course_id}}"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Create SubCourse - Video",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SubCourse created\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.subCourse && jsonData.subCourse.id) {",
+									"        pm.collectionVariables.set(\"subcourse_id\", jsonData.subCourse.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"course_id\": {{course_id}},\n  \"title\": \"Video Pembelajaran Matematika Dasar\",\n  \"summary\": \"Video pengenalan angka 1-10\",\n  \"content_type\": \"video\",\n  \"content_url\": \"https://example.com/video/angka-1-10\",\n  \"order_in_course\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/subcourses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"subcourses"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Upload Video Link",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "course_id",
+											"value": "{{course_id}}",
+											"type": "text"
+										},
+										{
+											"key": "title",
+											"value": "Cara Kerja Paru Paru",
+											"type": "text"
+										},
+										{
+											"key": "summary",
+											"value": "lorem ipsum dolor sit amet mbah",
+											"type": "text"
+										},
+										{
+											"key": "content_type",
+											"value": "video",
+											"type": "text"
+										},
+										{
+											"key": "content_url",
+											"value": "http:example.com",
+											"type": "text"
+										},
+										{
+											"key": "order_in_course",
+											"value": "8",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subcourses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Upload Video FIle",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "course_id",
+											"value": "{{course_id}}",
+											"type": "text"
+										},
+										{
+											"key": "title",
+											"value": "Cara Kerja Paru Paru",
+											"type": "text"
+										},
+										{
+											"key": "summary",
+											"value": "lorem ipsum dolor sit amet mbah",
+											"type": "text"
+										},
+										{
+											"key": "content_type",
+											"value": "video",
+											"type": "text"
+										},
+										{
+											"key": "video_file",
+											"type": "file",
+											"src": "/C:/Users/zaidu/Downloads/anjing_makan.mp4"
+										},
+										{
+											"key": "order_in_course",
+											"value": "8",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subcourses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Get SubCourse Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"subcourses",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Subcourse Video Paru-paru",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses",
+										"{{subcourse_id}}"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Update SubCourse",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Sistem peredaran darah pada mamalia\",\n  \"summary\": \"Updated summary\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"subcourses",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "SubCourse Pernapasan Mamalia - 23",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Sistem peredaran darah pada mamalia\",\n  \"summary\": \"Updated summary\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses",
+										"{{subcourse_id}}"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Student Progress System",
+			"item": [
+				{
+					"name": "Update Video/PDF Progress (Binary)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\",\n  \"score\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}/progress",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"subcourses",
+								"{{subcourse_id}}",
+								"progress"
+							]
+						},
+						"description": "For video/PDF content: score is binary (0 or 1)"
+					},
+					"response": [
+						{
+							"name": "video sub course id = 23",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"completed\",\n  \"score\": 1\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}/progress",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses",
+										"{{subcourse_id}}",
+										"progress"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Update Quiz Progress (Percentage)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\",\n  \"score\": 85\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}/progress",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"subcourses",
+								"{{subcourse_id}}",
+								"progress"
+							]
+						},
+						"description": "For quiz content: score is percentage (0-100)"
+					},
+					"response": [
+						{
+							"name": "quiz sub course id = 29",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"completed\",\n  \"score\": 85\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subcourses/{{subcourse_id}}/progress",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subcourses",
+										"{{subcourse_id}}",
+										"progress"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Chat & AI",
+			"item": [
+				{
+					"name": "Send Message to AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sub_course_id\": {{subcourse_id}},\n  \"message\": \"Bagaimana cara menghitung 2 + 3?\",\n  \"message_type\": \"text\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chat/message",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"message"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chat History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chat/history/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"history",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chat Interactions (Teacher)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chat/interactions?course_id={{course_id}}&limit=50",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"interactions"
+							],
+							"query": [
+								{
+									"key": "course_id",
+									"value": "{{course_id}}"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments System",
+			"item": [
+				{
+					"name": "Get Comments for SubCourse",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/comments/subcourse/{{subcourse_id}}?page=1&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"comments",
+								"subcourse",
+								"{{subcourse_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Comment created\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.collectionVariables.set(\"comment_id\", jsonData.data.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"This is a great lesson! Very helpful explanation.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/comments/subcourse/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"comments",
+								"subcourse",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Comment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated comment content - this lesson is amazing!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/comments/{{comment_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"comments",
+								"{{comment_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/comments/{{comment_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"comments",
+								"{{comment_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reactions System",
+			"item": [
+				{
+					"name": "Get Reactions for SubCourse",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reactions",
+								"subcourse",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Reaction - Like",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reaction_type\": \"like\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reactions",
+								"subcourse",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Reaction - Sad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reaction_type\": \"sad\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reactions",
+								"subcourse",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Reaction - Flat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reaction_type\": \"flat\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reactions",
+								"subcourse",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Reaction",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reactions/subcourse/{{subcourse_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reactions",
+								"subcourse",
+								"{{subcourse_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama_lengkap",
+									"value": "Zaadun Naafiek",
+									"type": "text"
+								},
+								{
+									"key": "foto_profil",
+									"type": "file",
+									"src": "/C:/Users/zaidu/Downloads/bbda0178f550b58be3f850c9a3d694ac.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"current_password\": \"1password123\",\n  \"new_password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users (Teacher Only)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "File Upload",
+			"item": [
+				{
+					"name": "Upload Single File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload/single",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload",
+								"single"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Multiple Files",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload/multiple",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload",
+								"multiple"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student Progress & Tasks",
+			"item": [
+				{
+					"name": "Get Global Progress Percentage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/student/progress-percentage",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"student",
+								"progress-percentage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Pending Quizzes (Tugas Saya)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/student/pending-quizzes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"student",
+								"pending-quizzes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Teacher Dashboard Analytics",
+			"item": [
+				{
+					"name": "Get Registered StudentsCounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/registered-students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"registered-students"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Completed Quizzes Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/completed-quizzes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"completed-quizzes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Quiz Score",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/average-quiz-score",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"average-quiz-score"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/students-active-today",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"students-active-today"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Teacher Course Management (Topik Aktif)",
+			"item": [
+				{
+					"name": "Get All Courses Analytics (Topik Aktif)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/courses-analytics",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"courses-analytics"
+							]
+						},
+						"description": "Get course analytics for teacher showing average completion, student count, and status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Students List for Specific Course",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/course/{{course_id}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"course",
+								"{{course_id}}",
+								"students"
+							]
+						},
+						"description": "Get all students enrolled in specific course with their progress and quiz scores"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity Analytics Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/analytics/teacher/activity-report",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analytics",
+								"teacher",
+								"activity-report"
+							]
+						},
+						"description": "Get detailed analytics report including most boring material, most distracted student, attention rates"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "New Quiz System",
+			"item": [
+				{
+					"name": "Teacher - Quiz Management",
+					"item": [
+						{
+							"name": "Get Quiz Settings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/settings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"settings"
+									]
+								},
+								"description": "Get quiz settings for a subcourse (teacher only)"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Quiz Settings",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"total_questions_in_pool\": 30,\n  \"questions_per_attempt\": 10,\n  \"time_limit_minutes\": 60,\n  \"max_attempts\": null,\n  \"shuffle_questions\": true,\n  \"shuffle_options\": true,\n  \"show_results_immediately\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/settings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Questions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/questions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Question",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Question created\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    if (jsonData.question && jsonData.question.id) {",
+											"        pm.collectionVariables.set(\"question_id\", jsonData.question.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_text\": \"Berapa hasil dari 5 x 7?\",\n  \"option_a\": \"30\",\n  \"option_b\": \"35\",\n  \"option_c\": \"40\",\n  \"option_d\": \"45\",\n  \"correct_answer\": \"B\",\n  \"difficulty_level\": \"easy\",\n  \"points\": 10\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/questions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Question",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_text\": \"Berapa hasil dari 6 x 8?\",\n  \"option_a\": \"42\",\n  \"option_b\": \"48\",\n  \"option_c\": \"54\",\n  \"option_d\": \"56\",\n  \"correct_answer\": \"B\",\n  \"difficulty_level\": \"medium\",\n  \"points\": 10\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/questions/{{question_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"questions",
+										"{{question_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Question",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/questions/{{question_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"questions",
+										"{{question_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Quiz Results",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/results",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"results"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Student - Quiz Taking",
+					"item": [
+						{
+							"name": "Start Quiz Session",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Quiz session started\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    if (jsonData.session_id) {",
+											"        pm.collectionVariables.set(\"session_id\", jsonData.session_id);",
+											"        pm.collectionVariables.set(\"session_token\", jsonData.session_token);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/subcourse/{{subcourse_id}}/start",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"subcourse",
+										"{{subcourse_id}}",
+										"start"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Submit Answer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_id\": 1,\n  \"selected_answer\": \"B\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/quiz/sessions/{{session_id}}/answer",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"answer"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Submit Quiz",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/sessions/{{session_id}}/submit",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"submit"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Quiz History",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/quiz/student/history/{{subcourse_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"quiz",
+										"student",
+										"history",
+										"{{subcourse_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Announcements",
+			"item": [
+				{
+					"name": "Create Announcements",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Ujian Tengah Semester",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "Ujian akan dilaksanakan pada tanggal 25 Januari 2024",
+									"type": "text"
+								},
+								{
+									"key": "course_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "draft",
+									"type": "text"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [],
+									"disabled": true
+								},
+								{
+									"key": "links",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/announcements",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Announcements for Students",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Ujian Tengah Semester",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "Ujian akan dilaksanakan pada tanggal 25 Januari 2024",
+									"type": "text"
+								},
+								{
+									"key": "course_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "draft",
+									"type": "text"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [],
+									"disabled": true
+								},
+								{
+									"key": "links",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/announcements/for-students?page=1&limit=10&course_id=1&priority=high",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements",
+								"for-students"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "course_id",
+									"value": "1"
+								},
+								{
+									"key": "priority",
+									"value": "high"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Announcements (Teacher)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/announcements/my-announcements?page=1&limit=10&status=published&course_id=1&search=ujian",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements",
+								"my-announcements"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "published"
+								},
+								{
+									"key": "course_id",
+									"value": "1"
+								},
+								{
+									"key": "search",
+									"value": "ujian"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Announcement (Teacher only)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Updated Title",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "Updated Content",
+									"type": "text"
+								},
+								{
+									"key": "priority",
+									"value": "urgent",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "published",
+									"type": "text"
+								},
+								{
+									"key": "new_attachments",
+									"type": "file",
+									"src": "/C:/Users/zaidu/Downloads/121eea4e893d59ff657b5e6549054781.jpg"
+								},
+								{
+									"key": "remove_attachment_ids",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/announcements/{{announcement_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements",
+								"{{announcement_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Publish Announcement (Teacher only)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/announcements/{{announcement_id}}/publish",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements",
+								"{{announcement_id}}",
+								"publish"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Archive Announcement (Teacher only)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/announcements/{{announcement_id}}/archive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements",
+								"{{announcement_id}}",
+								"archive"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Announcement (Teacher only)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/announcements/{{announcement_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"announcements",
+								"{{announcement_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student Analytics - Submit Data",
+			"item": [
+				{
+					"name": "Submit Analytics Session - High Attention",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Response has analytics data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('analytics');",
+									"    pm.expect(jsonData.analytics).to.have.property('attention_percentage');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sub_course_id\": 1,\n  \"session_id\": \"session_high_attention_{{$timestamp}}\",\n  \"total_duration\": 600,\n  \"session_start\": \"{{$isoTimestamp}}\",\n  \"analytics_data\": [\n    {\"timestamp\": 1, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 2, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 3, \"distracted\": true, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 4, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 5, \"distracted\": false, \"yawn\": true, \"eyes_closed\": false},\n    {\"timestamp\": 6, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 7, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 8, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 9, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 10, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/session",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"session"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Analytics Session - Low Attention",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Response has analytics data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('analytics');",
+									"    pm.expect(jsonData.analytics.attention_percentage).to.be.below(80);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sub_course_id\": 1,\n  \"session_id\": \"session_low_attention_{{$timestamp}}\",\n  \"total_duration\": 600,\n  \"session_start\": \"{{$isoTimestamp}}\",\n  \"analytics_data\": [\n    {\"timestamp\": 1, \"distracted\": true, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 2, \"distracted\": true, \"yawn\": true, \"eyes_closed\": false},\n    {\"timestamp\": 3, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 4, \"distracted\": true, \"yawn\": false, \"eyes_closed\": true},\n    {\"timestamp\": 5, \"distracted\": true, \"yawn\": true, \"eyes_closed\": false},\n    {\"timestamp\": 6, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 7, \"distracted\": true, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 8, \"distracted\": true, \"yawn\": true, \"eyes_closed\": true},\n    {\"timestamp\": 9, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 10, \"distracted\": true, \"yawn\": false, \"eyes_closed\": false}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/session",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"session"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Analytics Session - Different Material",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sub_course_id\": 2,\n  \"session_id\": \"session_material2_{{$timestamp}}\",\n  \"total_duration\": 480,\n  \"session_start\": \"{{$isoTimestamp}}\",\n  \"analytics_data\": [\n    {\"timestamp\": 1, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 2, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 3, \"distracted\": true, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 4, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 5, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 6, \"distracted\": false, \"yawn\": true, \"eyes_closed\": false},\n    {\"timestamp\": 7, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false},\n    {\"timestamp\": 8, \"distracted\": false, \"yawn\": false, \"eyes_closed\": false}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/session",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"session"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Teacher Analytics - Reports",
+			"item": [
+				{
+					"name": "Get Analytics Dashboard - Current Month",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has summary data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('summary');",
+									"    pm.expect(jsonData).to.have.property('material_reports');",
+									"    pm.expect(jsonData).to.have.property('student_reports');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/teacher/reports?month={{current_month}}&year={{current_year}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"teacher",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "month",
+									"value": "{{current_month}}"
+								},
+								{
+									"key": "year",
+									"value": "{{current_year}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Analytics Dashboard - All Time",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/teacher/reports",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"teacher",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Analytics Dashboard - Specific Course",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/teacher/reports?course_id=1&month={{current_month}}&year={{current_year}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"teacher",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "course_id",
+									"value": "1"
+								},
+								{
+									"key": "month",
+									"value": "{{current_month}}"
+								},
+								{
+									"key": "year",
+									"value": "{{current_year}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Analytics Dashboard - Specific SubCourse",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/teacher/reports?sub_course_id=1&month={{current_month}}&year={{current_year}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"teacher",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "sub_course_id",
+									"value": "1"
+								},
+								{
+									"key": "month",
+									"value": "{{current_month}}"
+								},
+								{
+									"key": "year",
+									"value": "{{current_year}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Detail Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has student data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('student');",
+									"    pm.expect(jsonData).to.have.property('detailed_report');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/student-analytics/teacher/student/{{student_id}}?month={{current_month}}&year={{current_year}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"student-analytics",
+								"teacher",
+								"student",
+								"{{student_id}}"
+							],
+							"query": [
+								{
+									"key": "month",
+									"value": "{{current_month}}"
+								},
+								{
+									"key": "year",
+									"value": "{{current_year}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Helper Requests",
+			"item": [
+				{
+					"name": "Get Courses (for testing)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Extract first course and subcourse IDs for testing",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.courses && jsonData.courses.length > 0) {",
+									"    pm.globals.set(\"course_id\", jsonData.courses[0].id);",
+									"    if (jsonData.courses[0].subcourses && jsonData.courses[0].subcourses.length > 0) {",
+									"        pm.globals.set(\"sub_course_id\", jsonData.courses[0].subcourses[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/courses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"courses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Students (for testing)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Extract first student ID for testing detail report",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.users && jsonData.users.length > 0) {",
+									"    var student = jsonData.users.find(u => u.role === 'student');",
+									"    if (student) {",
+									"        pm.globals.set(\"test_student_id\", student.id_user);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{teacher_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users?role=student",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "student"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Student submit analytics",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/student-analytics/session",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"student-analytics",
+						"session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/student-analytics/teacher/reports?month=1&year=2024",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"student-analytics",
+						"teacher",
+						"reports"
+					],
+					"query": [
+						{
+							"key": "month",
+							"value": "1"
+						},
+						{
+							"key": "year",
+							"value": "2024"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-add Authorization header if token exists",
+					"const token = pm.collectionVariables.get('token');",
+					"if (token && !pm.request.headers.has('Authorization')) {",
+					"    pm.request.headers.add({",
+					"        key: 'Authorization',",
+					"        value: 'Bearer ' + token",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://10.125.163.84:5001/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "course_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "subcourse_id",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "comment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "question_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "session_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

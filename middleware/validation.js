@@ -42,11 +42,11 @@ const schemas = {
     start_date: Joi.date().optional(),
     end_date: Joi.date().greater(Joi.ref('start_date')).optional()
   }),  createSubCourse: Joi.object({
-    course_id: Joi.number().integer().positive().required(),
+    course_id: Joi.number().integer().required(),
     title: Joi.string().min(3).max(255).required(),
-    summary: Joi.string().optional(),
-    content_type: Joi.string().valid('video', 'quiz', 'pdf_material', 'text', 'audio', 'image', 'pdf').required(),
-    content_url: Joi.string().uri().required(),
+    summary: Joi.string().max(1000).optional(),
+    content_type: Joi.string().valid('video', 'pdf_material', 'quiz', 'text', 'audio', 'image', 'pdf').required(),
+    content_url: Joi.string().uri().optional(), // Make optional since we can upload file
     order_in_course: Joi.number().integer().min(1).required()
   }),
   chatMessage: Joi.object({

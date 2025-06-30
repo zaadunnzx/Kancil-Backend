@@ -1,9 +1,52 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { SubCourse, Course, User, StudentSubCourseProgress, StudentEnrollment, Comment, Reaction } = require('../models');
 const { authenticate, teacherOnly, studentOnly } = require('../middleware/auth');
 const { validateRequest, schemas } = require('../middleware/validation');
 
 const router = express.Router();
+
+// Configure multer for video upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '..', 'uploads', 'videos');
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename: video-timestamp-random.ext
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    cb(null, 'video-' + uniqueSuffix + extension);
+  }
+});
+
+// File filter for videos only
+const fileFilter = (req, file, cb) => {
+  // Allow video files
+  const allowedTypes = /mp4|avi|mov|wmv|flv|webm|mkv/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = file.mimetype.startsWith('video/');
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only video files are allowed!'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB limit for videos
+  },
+  fileFilter: fileFilter
+});
 
 // Get subcourses for a course
 router.get('/course/:courseId', authenticate, async (req, res, next) => {
@@ -119,10 +162,33 @@ router.get('/:id', authenticate, async (req, res, next) => {
   }
 });
 
-// Create subcourse (teachers only)
-router.post('/', authenticate, teacherOnly, validateRequest(schemas.createSubCourse), async (req, res, next) => {
+// Create subcourse (teachers only) - Modified to handle video upload
+router.post('/', authenticate, teacherOnly, (req, res, next) => {
+  // Add custom error handling for multer
+  upload.single('video_file')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      console.error('Multer error:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File too large. Maximum size is 100MB.' });
+      }
+      return res.status(400).json({ error: 'File upload error: ' + err.message });
+    } else if (err) {
+      console.error('Upload error:', err);
+      return res.status(400).json({ error: err.message });
+    }
+    
+    // Continue with the actual route handler
+    handleSubcourseCreation(req, res, next);
+  });
+});
+
+// Separate the main logic into its own function
+async function handleSubcourseCreation(req, res, next) {
   try {
     console.log('Request body received:', req.body); // Debug log
+    console.log('Uploaded file:', req.file); // Debug log
+    console.log('Content-Type header:', req.get('Content-Type')); // Debug log
+    
     const { course_id, title, summary, content_type, content_url, order_in_course } = req.body;
     
     // Verify teacher owns the course
@@ -135,24 +201,75 @@ router.post('/', authenticate, teacherOnly, validateRequest(schemas.createSubCou
       return res.status(403).json({ error: 'Not authorized to add content to this course' });
     }
 
+    let finalContentUrl = content_url;
+
+    // Handle video upload if content_type is video
+    if (content_type === 'video') {
+      if (req.file) {
+        // Create video URL from uploaded file
+        finalContentUrl = `/uploads/videos/${req.file.filename}`;
+        console.log('Video uploaded successfully:', finalContentUrl);
+      } else if (!content_url) {
+        // Provide more detailed error information
+        return res.status(400).json({ 
+          error: 'For video content, either upload a video file or provide a video URL',
+          debug: {
+            file_received: !!req.file,
+            content_url_provided: !!content_url,
+            content_type: req.get('Content-Type'),
+            expected_field_name: 'video_file',
+            supported_formats: 'mp4, avi, mov, wmv, flv, webm, mkv',
+            max_file_size: '100MB'
+          }
+        });
+      }
+    }
+
     const subCourse = await SubCourse.create({
       course_id,
       title,
       summary,
       content_type,
-      content_url,
+      content_url: finalContentUrl,
       order_in_course
+    });
+
+    // Include course info in response
+    const subCourseWithCourse = await SubCourse.findByPk(subCourse.id, {
+      include: [
+        {
+          model: Course,
+          as: 'course',
+          attributes: ['id', 'title', 'subject']
+        }
+      ]
     });
 
     res.status(201).json({
       message: 'SubCourse created successfully',
-      subCourse
+      subCourse: subCourseWithCourse,
+      upload_info: req.file ? {
+        original_name: req.file.originalname,
+        file_size: req.file.size,
+        file_path: finalContentUrl
+      } : null
     });
   } catch (error) {
     console.error('Create subcourse error:', error); // Debug log
+    
+    // Clean up uploaded file if database operation fails
+    if (req.file) {
+      const filePath = req.file.path;
+      fs.unlink(filePath, (unlinkError) => {
+        if (unlinkError) {
+          console.error('Failed to delete uploaded file:', unlinkError);
+        }
+      });
+    }
+    
     next(error);
   }
-});
+}
 
 // Update subcourse (teachers only)
 router.put('/:id', authenticate, teacherOnly, async (req, res, next) => {

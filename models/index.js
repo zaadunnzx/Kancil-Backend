@@ -21,6 +21,11 @@ const QuizAnswer = require('./QuizAnswer');
 const QuizResult = require('./QuizResult');
 const QuizSettings = require('./QuizSettings');
 
+// Import analytics model
+const StudentAnalytics = require('./StudentAnalytics');
+
+// Define all associations after all models are loaded
+
 // Define associations
 // User associations
 User.hasMany(Course, { foreignKey: 'teacher_id', as: 'teacherCourses' });
@@ -106,6 +111,26 @@ AnnouncementAttachment.belongsTo(Announcement, {
   as: 'announcement' 
 });
 
+// StudentAnalytics associations
+StudentAnalytics.belongsTo(User, { 
+  foreignKey: 'student_id', 
+  as: 'student' 
+});
+StudentAnalytics.belongsTo(SubCourse, { 
+  foreignKey: 'sub_course_id', 
+  as: 'subcourse' 
+});
+
+// Reverse associations
+User.hasMany(StudentAnalytics, { 
+  foreignKey: 'student_id', 
+  as: 'analytics' 
+});
+SubCourse.hasMany(StudentAnalytics, { 
+  foreignKey: 'sub_course_id', 
+  as: 'analytics' 
+});
+
 // Quiz System Associations
 QuizBank.belongsTo(SubCourse, { 
   foreignKey: 'subcourse_id', 
@@ -167,5 +192,6 @@ module.exports = {
   QuizSession,
   QuizAnswer,
   QuizResult,
-  QuizSettings
+  QuizSettings,
+  StudentAnalytics
 };

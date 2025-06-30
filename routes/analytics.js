@@ -924,6 +924,33 @@ router.get('/teacher/activity-report', authenticate, async (req, res, next) => {
   }
 });
 
+// Fix: Remove dummy response and add proper redirect to student-analytics
+router.get('/teacher/reports', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    // Redirect to proper student-analytics endpoint
+    const queryString = new URLSearchParams(req.query).toString();
+    const redirectUrl = '/api/student-analytics/teacher/reports' + (queryString ? '?' + queryString : '');
+    
+    return res.redirect(307, redirectUrl);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Add note about deprecated endpoint
+router.get('/reports', authenticate, teacherOnly, async (req, res, next) => {
+  try {
+    res.json({
+      message: "This endpoint is deprecated. Please use /api/student-analytics/teacher/reports instead",
+      redirect_to: "/api/student-analytics/teacher/reports",
+      query: req.query,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get registered students count (unique students across all teacher's courses)
 router.get('/teacher/registered-students', authenticate, async (req, res, next) => {
   try {
