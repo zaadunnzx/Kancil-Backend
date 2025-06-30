@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { authenticate } = require('../middleware/auth');
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -155,6 +156,39 @@ router.post('/profile-photo', authenticate, upload.single('foto_profil'), async 
     });
   } catch (error) {
     next(error);
+  }
+});
+
+// Serve uploaded files with proper CORS headers
+router.get('/:type/:filename', (req, res) => {
+  try {
+    const { type, filename } = req.params;
+    
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    
+    // Validate type
+    const allowedTypes = ['images', 'videos', 'documents', 'courses', 'profiles', 'announcements'];
+    if (!allowedTypes.includes(type)) {
+      return res.status(400).json({ error: 'Invalid file type' });
+    }
+    
+    // Construct file path
+    const filePath = path.join(__dirname, '..', 'uploads', type, filename);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    
+    // Send file
+    res.sendFile(filePath);
+  } catch (error) {
+    console.error('Error serving file:', error);
+    res.status(500).json({ error: 'Failed to serve file' });
   }
 });
 

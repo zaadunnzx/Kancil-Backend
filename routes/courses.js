@@ -417,8 +417,94 @@ router.post('/join', authenticate, async (req, res, next) => {
   }
 });
 
-// Update course (teacher only)
-router.put('/:id', authenticate, teacherOnly, async (req, res, next) => {
+// Update course (teacher only) - Support cover image upload
+router.put('/:id', authenticate, teacherOnly, upload.single('cover_image_url'), async (req, res, next) => {
+  try {
+    console.log('Update course request body:', req.body);
+    console.log('Update course file:', req.file);
+
+    const course = await Course.findByPk(req.params.id);
+    
+    if (!course) {
+      // Clean up uploaded file if course not found
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete file:', err);
+        });
+      }
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.teacher_id !== req.user.id_user) {
+      // Clean up uploaded file if not authorized
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete file:', err);
+        });
+      }
+      return res.status(403).json({ error: 'Not authorized to update this course' });
+    }
+
+    // Prepare update data
+    const updateData = { ...req.body };
+
+    // Handle cover image upload
+    if (req.file) {
+      // Delete old cover image if exists
+      if (course.cover_image_url) {
+        const oldImagePath = course.cover_image_url.replace(`${req.protocol}://${req.get('host')}/`, '');
+        const fullOldPath = path.join(__dirname, '..', oldImagePath);
+        fs.unlink(fullOldPath, (err) => {
+          if (err) console.log('Old image file not found or already deleted');
+        });
+      }
+
+      // Set new cover image URL
+      updateData.cover_image_url = `${req.protocol}://${req.get('host')}/uploads/courses/${req.file.filename}`;
+    }
+
+    // Validate fields if provided
+    if (updateData.subject && !['Matematika', 'IPA', 'IPS'].includes(updateData.subject)) {
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete file:', err);
+        });
+      }
+      return res.status(400).json({ 
+        error: 'Subject must be one of: Matematika, IPA, IPS' 
+      });
+    }
+
+    if (updateData.kelas) {
+      const kelasNumber = parseInt(updateData.kelas);
+      if (isNaN(kelasNumber) || kelasNumber < 1 || kelasNumber > 12) {
+        if (req.file) {
+          fs.unlink(req.file.path, (err) => {
+            if (err) console.error('Failed to delete file:', err);
+          });
+        }
+        return res.status(400).json({ 
+          error: 'Kelas must be a number between 1 and 12' 
+        });
+      }
+      updateData.kelas = kelasNumber;
+    }
+
+    await course.update(updateData);
+    res.json({ message: 'Course updated successfully', course });
+  } catch (error) {
+    // Clean up uploaded file if any error occurs
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error('Failed to delete file:', err);
+      });
+    }
+    next(error);
+  }
+});
+
+// Update course with JSON data only (no file upload) - Alternative endpoint
+router.put('/:id/update-json', authenticate, teacherOnly, async (req, res, next) => {
   try {
     const course = await Course.findByPk(req.params.id);
     
@@ -430,7 +516,26 @@ router.put('/:id', authenticate, teacherOnly, async (req, res, next) => {
       return res.status(403).json({ error: 'Not authorized to update this course' });
     }
 
-    await course.update(req.body);
+    // Validate fields if provided
+    const updateData = { ...req.body };
+    
+    if (updateData.subject && !['Matematika', 'IPA', 'IPS'].includes(updateData.subject)) {
+      return res.status(400).json({ 
+        error: 'Subject must be one of: Matematika, IPA, IPS' 
+      });
+    }
+
+    if (updateData.kelas) {
+      const kelasNumber = parseInt(updateData.kelas);
+      if (isNaN(kelasNumber) || kelasNumber < 1 || kelasNumber > 12) {
+        return res.status(400).json({ 
+          error: 'Kelas must be a number between 1 and 12' 
+        });
+      }
+      updateData.kelas = kelasNumber;
+    }
+
+    await course.update(updateData);
     res.json({ message: 'Course updated successfully', course });
   } catch (error) {
     next(error);
